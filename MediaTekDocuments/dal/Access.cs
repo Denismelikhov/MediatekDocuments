@@ -19,34 +19,41 @@ namespace MediaTekDocuments.dal
         /// adresse de l'API
         /// </summary>
         private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/";
+
         /// <summary>
         /// instance unique de la classe
         /// </summary>
         private static Access instance = null;
+
         /// <summary>
         /// instance de ApiRest pour envoyer des demandes vers l'api et recevoir la réponse
         /// </summary>
         private readonly ApiRest api = null;
+
         /// <summary>
         /// méthode HTTP pour select
         /// </summary>
         private const string GET = "GET";
+
         /// <summary>
         /// méthode HTTP pour insert
         /// </summary>
         private const string POST = "POST";
-        /// <summary>
-        /// méthode HTTP pour update
 
-        private const string PUT = "PUT";
-        /// <summary>
-        /// méthode HTTP pour ajouter
+        // <summary>
+        /// méthode HTTP pour update
         /// </summary>
-        
-        private const string DELETE = "DELETE";
+        private const string PUT = "PUT";
+
         /// <summary>
         /// méthode HTTP pour supprimer
         /// </summary>
+        private const string DELETE = "DELETE";
+
+        /// <summary>
+        /// chaîne d'authentification transmise à l'API
+        /// </summary>
+        private string authentificationString = "";
 
         /// <summary>
         /// Méthode privée pour créer un singleton
@@ -54,11 +61,9 @@ namespace MediaTekDocuments.dal
         /// </summary>
         private Access()
         {
-            String authenticationString;
             try
             {
-                authenticationString = "admin:adminpwd";
-                api = ApiRest.GetInstance(uriApi, authenticationString);
+                api = ApiRest.GetInstance(uriApi, authentificationString);
             }
             catch (Exception e)
             {
@@ -78,6 +83,61 @@ namespace MediaTekDocuments.dal
                 instance = new Access();
             }
             return instance;
+        }
+
+        /// <summary>
+        /// Méthode d'authentification avec login et pwd
+        /// </summary>
+        /// <returns>instance unique de la classe</returns>
+        public void SetAuthentication(string login, string pwd)
+        {
+            authentificationString = login + ":" + pwd;
+            api.SetAuthentication(authentificationString);
+        }
+
+        /// <summary>
+        /// Tester l'authentification
+        /// </summary>
+        /// <returns>instance unique de la classe</returns>
+        public bool TesterAuthentification(string login, string pwd)
+        {
+            try
+            {
+                SetAuthentication(login, pwd);
+                List<Categorie> genres = GetAllGenres();
+                return genres != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>instance unique de la classe</returns>
+        public Utilisateur GetUtilisateur(string login, string pwd)
+        {
+            try
+            {
+                SetAuthentication(login, pwd);
+                JObject retour = api.RecupDistant(GET, "utilisateurconnecte", null);
+                string code = (string)retour["code"];
+
+                if (code != "200")
+                {
+                    return null;
+                }
+
+                string resultString = JsonConvert.SerializeObject(retour["result"]);
+                return JsonConvert.DeserializeObject<Utilisateur>(resultString);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         /// <summary>

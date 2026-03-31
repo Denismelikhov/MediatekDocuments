@@ -17,6 +17,7 @@ namespace MediaTekDocuments.view
     {
         #region Commun
         private readonly FrmMediatekController controller;
+        private readonly Utilisateur utilisateur;
         private readonly BindingSource bdgGenres = new BindingSource();
         private readonly BindingSource bdgPublics = new BindingSource();
         private readonly BindingSource bdgRayons = new BindingSource();
@@ -24,12 +25,129 @@ namespace MediaTekDocuments.view
         /// <summary>
         /// Constructeur : création du contrôleur lié à ce formulaire
         /// </summary>
-        internal FrmMediatek()
+        internal FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
+            this.utilisateur = utilisateur;
             this.controller = new FrmMediatekController();
             InitialiserOngletCommandes();
             InitialiserOngletAbonnements();
+            AppliquerDroits();
+        }
+
+        private void AppliquerDroits()
+        {
+            if (utilisateur == null)
+            {
+                MessageBox.Show("Utilisateur non connecté.");
+                Close();
+                return;
+            }
+
+            this.Text = "Gestion des documents de la médiathèque - " + utilisateur.login + " (" + utilisateur.service + ")";
+
+            if (utilisateur.AccesTotal)
+            {
+                AppliquerAccesTotal();
+            }
+            else if (utilisateur.ConsultationSeulement)
+            {
+                AppliquerConsultationSeule();
+            }
+        }
+
+        private void AppliquerAccesTotal()
+        {
+            GererLivres(true);
+            GererDvd(true);
+            GererRevues(true);
+            GererReception(true);
+            GererCommandes(true);
+            GererAbonnements(true);
+        }
+
+        private void AppliquerConsultationSeule()
+        {
+            GererLivres(false);
+            GererDvd(false);
+            GererRevues(false);
+            GererReception(false);
+            GererCommandes(false);
+            GererAbonnements(false);
+
+            tabReceptionRevue.Enabled = false;
+            tabCommandes.Enabled = false;
+            tabAbonnements.Enabled = false;
+        }
+
+        private void GererLivres(bool actif)
+        {
+            btnLivresAjouter.Enabled = actif;
+            btnLivresModifier.Enabled = actif;
+            btnLivresSupprimer.Enabled = actif;
+            btnLivresEnregistrer.Enabled = actif;
+            btnLivresAnnuler.Enabled = actif;
+        }
+
+        private void GererDvd(bool actif)
+        {
+            btnDvdAjouter.Enabled = actif;
+            btnDvdModifier.Enabled = actif;
+            btnDvdSupprimer.Enabled = actif;
+            btnDvdEnregistrer.Enabled = actif;
+            btnDvdAnnuler.Enabled = actif;
+        }
+
+        private void GererRevues(bool actif)
+        {
+            btnRevuesAjouter.Enabled = actif;
+            btnRevuesModifier.Enabled = actif;
+            btnRevuesSupprimer.Enabled = actif;
+            btnRevuesEnregistrer.Enabled = actif;
+            btnRevuesAnnuler.Enabled = actif;
+        }
+
+        private void GererReception(bool actif)
+        {
+            btnReceptionExemplaireValider.Enabled = actif;
+            btnSupprimerExemplaire.Enabled = actif;
+            btnModifierEtatExemplaire.Enabled = actif;
+            btnReceptionExemplaireImage.Enabled = actif;
+        }
+
+        private void GererCommandes(bool actif)
+        {
+            btnAjouterCommande.Enabled = actif;
+            btnModifierCommande.Enabled = actif;
+            btnSupprimerCommande.Enabled = actif;
+            btnEnregistrerCommande.Enabled = actif;
+            btnAnnulerCommande.Enabled = actif;
+        }
+
+        private void GererAbonnements(bool actif)
+        {
+            btnAjouterCommandeRevue.Enabled = actif;
+            btnModifierCommandeRevue.Enabled = actif;
+            btnSupprimerCommandeRevue.Enabled = actif;
+            btnEnregistrerCommandeRevue.Enabled = actif;
+            btnAnnulerCommandeRevue.Enabled = actif;
+        }
+
+        private bool VerifierDroitEcriture()
+        {
+            if (utilisateur == null)
+            {
+                MessageBox.Show("Utilisateur non identifié.");
+                return false;
+            }
+
+            if (!utilisateur.AccesTotal)
+            {
+                MessageBox.Show("Vous n'avez pas les droits pour effectuer cette action.");
+                return false;
+            }
+
+            return true;
         }
 
         private Livre RecupererLivreSelectionne()
@@ -480,77 +598,80 @@ namespace MediaTekDocuments.view
 
         private void btnLivresSupprimer_Click(object sender, EventArgs e)
         {
-            Livre livre = RecupererLivreSelectionne();
+            if (!VerifierDroitEcriture()) return;
+                Livre livre = RecupererLivreSelectionne();
 
-            if (livre == null)
-            {
-                MessageBox.Show("Veuillez sélectionner un livre.");
-                return;
-            }
+                if (livre == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un livre.");
+                    return;
+                }
 
-            if (!controller.DocumentSupprimable(livre))
-            {
-                MessageBox.Show("Suppression impossible : le livre possède des dépendances.");
-                return;
-            }
+                if (!controller.DocumentSupprimable(livre))
+                {
+                    MessageBox.Show("Suppression impossible : le livre possède des dépendances.");
+                    return;
+                }
 
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous vraiment supprimer ce livre ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous vraiment supprimer ce livre ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
-            if (rep != DialogResult.Yes)
-            {
-                return;
-            }
+                if (rep != DialogResult.Yes)
+                {
+                    return;
+                }
 
-            if (controller.SupprimerLivre(livre.Id))
-            {
-                MessageBox.Show("Suppression effectuée.");
-                RechargerLivres();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de la suppression.");
-            }
+                if (controller.SupprimerLivre(livre.Id))
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    RechargerLivres();
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la suppression.");
+                }
         }
 
         private void btnLivresAjouter_Click(object sender, EventArgs e)
         {
-            livresModeAjout = true;
-            livresModeModification = false;
+            if (!VerifierDroitEcriture()) return;
+                livresModeAjout = true;
+                livresModeModification = false;
 
-            ViderChampsLivre();
-            ActiverEditionLivre(true);
+                ViderChampsLivre();
+                ActiverEditionLivre(true);
 
-            txbLivresNumero.ReadOnly = false;
-            txbLivresNumero.Focus();
+                txbLivresNumero.ReadOnly = false;
+                txbLivresNumero.Focus();
 
-            ActiverCommandeLivre(true);
+                ActiverCommandeLivre(true);
         }
 
         private void btnLivresModifier_Click(object sender, EventArgs e)
         {
-            Livre livre = RecupererLivreSelectionne();
+            if (!VerifierDroitEcriture()) return;
+                Livre livre = RecupererLivreSelectionne();
 
-            if (livre == null)
-            {
-                MessageBox.Show("Veuillez sélectionner un livre.");
-                return;
-            }
+                if (livre == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un livre.");
+                    return;
+                }
 
-            livresModeAjout = false;
-            livresModeModification = true;
+                livresModeAjout = false;
+                livresModeModification = true;
 
-            ActiverEditionLivre(true);
+                ActiverEditionLivre(true);
 
-            // le numéro ne doit pas être modifiable
-            txbLivresNumero.ReadOnly = true;
-            txbLivresTitre.Focus();
+                // le numéro ne doit pas être modifiable
+                txbLivresNumero.ReadOnly = true;
+                txbLivresTitre.Focus();
 
-            ActiverCommandeLivre(true);
+                ActiverCommandeLivre(true);
         }
 
         private void btnLivresAnnuler_Click(object sender, EventArgs e)
@@ -999,75 +1120,78 @@ namespace MediaTekDocuments.view
 
         private void btnDvdSupprimer_Click(object sender, EventArgs e)
         {
-            Dvd dvd = RecupererDvdSelectionne();
+            if (!VerifierDroitEcriture()) return;
+                Dvd dvd = RecupererDvdSelectionne();
 
-            if (dvd == null)
-            {
-                MessageBox.Show("Veuillez sélectionner un dvd.");
-                return;
-            }
+                if (dvd == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un dvd.");
+                    return;
+                }
 
-            if (!controller.DocumentSupprimable(dvd))
-            {
-                MessageBox.Show("Suppression impossible : le dvd possède des dépendances.");
-                return;
-            }
+                if (!controller.DocumentSupprimable(dvd))
+                {
+                    MessageBox.Show("Suppression impossible : le dvd possède des dépendances.");
+                    return;
+                }
 
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous vraiment supprimer ce dvd ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous vraiment supprimer ce dvd ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
-            if (rep != DialogResult.Yes)
-            {
-                return;
-            }
+                if (rep != DialogResult.Yes)
+                {
+                    return;
+                }
 
-            if (controller.SupprimerDvd(dvd.Id))
-            {
-                MessageBox.Show("Suppression effectuée.");
-                RechargerDvd();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de la suppression.");
-            }
+                if (controller.SupprimerDvd(dvd.Id))
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    RechargerDvd();
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la suppression.");
+                }
         }
 
         private void btnDvdAjouter_Click(object sender, EventArgs e)
         {
-            dvdModeAjout = true;
-            dvdModeModification = false;
+            if (!VerifierDroitEcriture()) return;
+                dvdModeAjout = true;
+                dvdModeModification = false;
 
-            ViderChampsDvd();
-            ActiverEditionDvd(true);
+                ViderChampsDvd();
+                ActiverEditionDvd(true);
 
-            txbDvdNumero.ReadOnly = false;
-            txbDvdNumero.Focus();
+                txbDvdNumero.ReadOnly = false;
+                txbDvdNumero.Focus();
 
-            ActiverCommandeDvd(true);
+                ActiverCommandeDvd(true);
         }
 
         private void btnDvdModifier_Click(object sender, EventArgs e)
         {
-            Dvd dvd = RecupererDvdSelectionne();
+            if (!VerifierDroitEcriture()) return;
+                Dvd dvd = RecupererDvdSelectionne();
 
-            if (dvd == null)
-            {
-                MessageBox.Show("Veuillez sélectionner un dvd.");
-                return;
-            }
+                if (dvd == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un dvd.");
+                    return;
+                }
 
-            dvdModeAjout = false;
-            dvdModeModification = true;
+                dvdModeAjout = false;
+                dvdModeModification = true;
 
-            ActiverEditionDvd(true);
-            txbDvdNumero.ReadOnly = true;
-            txbDvdTitre.Focus();
+                ActiverEditionDvd(true);
+                txbDvdNumero.ReadOnly = true;
+                txbDvdTitre.Focus();
 
-            ActiverCommandeDvd(true);
+                ActiverCommandeDvd(true);
         }
 
         private void btnDvdAnnuler_Click(object sender, EventArgs e)
@@ -1517,74 +1641,77 @@ namespace MediaTekDocuments.view
 
         private void btnRevuesSupprimer_Click(object sender, EventArgs e)
         {
-            Revue revue = RecupererRevueSelectionnee();
+            if (!VerifierDroitEcriture()) return;
+                Revue revue = RecupererRevueSelectionnee();
 
-            if (revue == null)
-            {
-                MessageBox.Show("Veuillez sélectionner une revue.");
-                return;
-            }
+                if (revue == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner une revue.");
+                    return;
+                }
 
-            if (!controller.DocumentSupprimable(revue))
-            {
-                MessageBox.Show("Suppression impossible : la revue possède des dépendances.");
-                return;
-            }
+                if (!controller.DocumentSupprimable(revue))
+                {
+                    MessageBox.Show("Suppression impossible : la revue possède des dépendances.");
+                    return;
+                }
 
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous vraiment supprimer cette revue ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous vraiment supprimer cette revue ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
-            if (rep != DialogResult.Yes)
-            {
-                return;
-            }
+                if (rep != DialogResult.Yes)
+                {
+                    return;
+                }
 
-            if (controller.SupprimerRevue(revue.Id))
-            {
-                MessageBox.Show("Suppression effectuée.");
-                RechargerRevues();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de la suppression.");
-            }
+                if (controller.SupprimerRevue(revue.Id))
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    RechargerRevues();
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la suppression.");
+                }
         }
         private void btnRevuesAjouter_Click(object sender, EventArgs e)
         {
-            revuesModeAjout = true;
-            revuesModeModification = false;
+            if (!VerifierDroitEcriture()) return;
+                revuesModeAjout = true;
+                revuesModeModification = false;
 
-            ViderChampsRevue();
-            ActiverEditionRevue(true);
+                ViderChampsRevue();
+                ActiverEditionRevue(true);
 
-            txbRevuesNumero.ReadOnly = false;
-            txbRevuesNumero.Focus();
+                txbRevuesNumero.ReadOnly = false;
+                txbRevuesNumero.Focus();
 
-            ActiverCommandeRevue(true);
+                ActiverCommandeRevue(true);
         }
 
         private void btnRevuesModifier_Click(object sender, EventArgs e)
         {
-            Revue revue = RecupererRevueSelectionnee();
+            if (!VerifierDroitEcriture()) return;
+                Revue revue = RecupererRevueSelectionnee();
 
-            if (revue == null)
-            {
-                MessageBox.Show("Veuillez sélectionner une revue.");
-                return;
-            }
+                if (revue == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner une revue.");
+                    return;
+                }
 
-            revuesModeAjout = false;
-            revuesModeModification = true;
+                revuesModeAjout = false;
+                revuesModeModification = true;
 
-            ActiverEditionRevue(true);
-            txbRevuesNumero.ReadOnly = true;
-            txbRevuesTitre.Focus();
+                ActiverEditionRevue(true);
+                txbRevuesNumero.ReadOnly = true;
+                txbRevuesTitre.Focus();
 
-            ActiverCommandeRevue(true);
+                ActiverCommandeRevue(true);
         }
 
         private void btnRevuesAnnuler_Click(object sender, EventArgs e)
@@ -2009,36 +2136,37 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnReceptionExemplaireValider_Click(object sender, EventArgs e)
         {
-            if (!txbReceptionExemplaireNumero.Text.Equals(""))
-            {
-                try
+            if (!VerifierDroitEcriture()) return;
+                if (!txbReceptionExemplaireNumero.Text.Equals(""))
                 {
-                    int numero = int.Parse(txbReceptionExemplaireNumero.Text);
-                    DateTime dateAchat = dtpReceptionExemplaireDate.Value;
-                    string photo = txbReceptionExemplaireImage.Text;
-                    string idEtat = ETATNEUF;
-                    string idDocument = txbReceptionRevueNumero.Text;
-                    Exemplaire exemplaire = new Exemplaire(numero, dateAchat, photo, idEtat, idDocument);
-                    if (controller.CreerExemplaire(exemplaire))
+                    try
                     {
-                        AfficheReceptionExemplairesDocument();
+                        int numero = int.Parse(txbReceptionExemplaireNumero.Text);
+                        DateTime dateAchat = dtpReceptionExemplaireDate.Value;
+                        string photo = txbReceptionExemplaireImage.Text;
+                        string idEtat = ETATNEUF;
+                        string idDocument = txbReceptionRevueNumero.Text;
+                        Exemplaire exemplaire = new Exemplaire(numero, dateAchat, photo, idEtat, idDocument);
+                        if (controller.CreerExemplaire(exemplaire))
+                        {
+                            AfficheReceptionExemplairesDocument();
+                        }
+                        else
+                        {
+                            MessageBox.Show("numéro de publication déjà existant", "Erreur");
+                        }
                     }
-                    else
+                    catch
                     {
-                        MessageBox.Show("numéro de publication déjà existant", "Erreur");
+                        MessageBox.Show("le numéro de parution doit être numérique", "Information");
+                        txbReceptionExemplaireNumero.Text = "";
+                        txbReceptionExemplaireNumero.Focus();
                     }
                 }
-                catch
+                else
                 {
-                    MessageBox.Show("le numéro de parution doit être numérique", "Information");
-                    txbReceptionExemplaireNumero.Text = "";
-                    txbReceptionExemplaireNumero.Focus();
+                    MessageBox.Show("numéro de parution obligatoire", "Information");
                 }
-            }
-            else
-            {
-                MessageBox.Show("numéro de parution obligatoire", "Information");
-            }
         }
 
         /// <summary>
@@ -2121,92 +2249,94 @@ namespace MediaTekDocuments.view
 
         private void btnModifierEtatExemplaire_Click(object sender, EventArgs e)
         {
-            if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
-            {
-                MessageBox.Show("Sélectionnez un exemplaire.");
-                return;
-            }
-
-            if (cbxReceptionExemplaireEtat.SelectedIndex < 0)
-            {
-                MessageBox.Show("Sélectionnez un état.");
-                return;
-            }
-
-            Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
-
-            string idEtat = "";
-            switch (cbxReceptionExemplaireEtat.SelectedIndex)
-            {
-                case 0:
-                    idEtat = "00001";
-                    break;
-                case 1:
-                    idEtat = "00002";
-                    break;
-                case 2:
-                    idEtat = "00003";
-                    break;
-                case 3:
-                    idEtat = "00004";
-                    break;
-                default:
-                    MessageBox.Show("Etat invalide.");
+            if (!VerifierDroitEcriture()) return;
+                if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
+                {
+                    MessageBox.Show("Sélectionnez un exemplaire.");
                     return;
-            }
+                }
 
-            Exemplaire exemplaireModifie = new Exemplaire(
-                exemplaire.Numero,
-                exemplaire.DateAchat,
-                exemplaire.Photo,
-                idEtat,
-                exemplaire.Id
-            );
+                if (cbxReceptionExemplaireEtat.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Sélectionnez un état.");
+                    return;
+                }
 
-            bool ok = controller.ModifierExemplaire(exemplaireModifie);
+                Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
 
-            if (ok)
-            {
-                MessageBox.Show("Modification effectuée.");
-                AfficheReceptionExemplairesDocument();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de la modification.");
-            }
-        }
+                string idEtat = "";
+                switch (cbxReceptionExemplaireEtat.SelectedIndex)
+                {
+                    case 0:
+                        idEtat = "00001";
+                        break;
+                    case 1:
+                        idEtat = "00002";
+                        break;
+                    case 2:
+                        idEtat = "00003";
+                        break;
+                    case 3:
+                        idEtat = "00004";
+                        break;
+                    default:
+                        MessageBox.Show("Etat invalide.");
+                        return;
+                }
 
-        private void btnSupprimerExemplaire_Click(object sender, EventArgs e)
-        {
-            if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
-            {
-                MessageBox.Show("Sélectionnez un exemplaire.");
-                return;
-            }
+                Exemplaire exemplaireModifie = new Exemplaire(
+                    exemplaire.Numero,
+                    exemplaire.DateAchat,
+                    exemplaire.Photo,
+                    idEtat,
+                    exemplaire.Id
+                );
 
-            Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
-
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous supprimer cet exemplaire ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (rep == DialogResult.Yes)
-            {
-                bool ok = controller.SupprimerExemplaire(exemplaire.Id, exemplaire.Numero);
+                bool ok = controller.ModifierExemplaire(exemplaireModifie);
 
                 if (ok)
                 {
-                    MessageBox.Show("Suppression effectuée.");
+                    MessageBox.Show("Modification effectuée.");
                     AfficheReceptionExemplairesDocument();
                 }
                 else
                 {
-                    MessageBox.Show("Erreur lors de la suppression.");
+                    MessageBox.Show("Erreur lors de la modification.");
                 }
-            }
+        }
+
+        private void btnSupprimerExemplaire_Click(object sender, EventArgs e)
+        {
+            if (!VerifierDroitEcriture()) return;
+                if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
+                {
+                    MessageBox.Show("Sélectionnez un exemplaire.");
+                    return;
+                }
+
+                Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
+
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous supprimer cet exemplaire ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (rep == DialogResult.Yes)
+                {
+                    bool ok = controller.SupprimerExemplaire(exemplaire.Id, exemplaire.Numero);
+
+                    if (ok)
+                    {
+                        MessageBox.Show("Suppression effectuée.");
+                        AfficheReceptionExemplairesDocument();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Erreur lors de la suppression.");
+                    }
+                }
         }
         #endregion
 
@@ -2480,45 +2610,47 @@ namespace MediaTekDocuments.view
 
         private void btnAjouterCommande_Click(object sender, EventArgs e)
         {
-            if (idDocumentSelectionne == "")
-            {
-                MessageBox.Show("Sélectionnez d'abord un document.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (idDocumentSelectionne == "")
+                {
+                    MessageBox.Show("Sélectionnez d'abord un document.");
+                    return;
+                }
 
-            enCoursAjoutCommande = true;
-            enCoursModificationCommande = false;
+                enCoursAjoutCommande = true;
+                enCoursModificationCommande = false;
 
-            ViderChampsCommande();
-            ActiverSaisieCommande(true);
+                ViderChampsCommande();
+                ActiverSaisieCommande(true);
 
-            cbxSuiviCommande.Text = "en cours";
+                cbxSuiviCommande.Text = "en cours";
 
-            btnAjouterCommande.Enabled = false;
-            btnModifierCommande.Enabled = false;
-            btnSupprimerCommande.Enabled = false;
-            btnEnregistrerCommande.Enabled = true;
-            btnAnnulerCommande.Enabled = true;
+                btnAjouterCommande.Enabled = false;
+                btnModifierCommande.Enabled = false;
+                btnSupprimerCommande.Enabled = false;
+                btnEnregistrerCommande.Enabled = true;
+                btnAnnulerCommande.Enabled = true;
         }
 
         private void btnModifierCommande_Click(object sender, EventArgs e)
         {
-            if (txtNumeroCommande.Text.Trim() == "")
-            {
-                MessageBox.Show("Sélectionnez une commande.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (txtNumeroCommande.Text.Trim() == "")
+                {
+                    MessageBox.Show("Sélectionnez une commande.");
+                    return;
+                }
 
-            enCoursAjoutCommande = false;
-            enCoursModificationCommande = true;
+                enCoursAjoutCommande = false;
+                enCoursModificationCommande = true;
 
-            ActiverSaisieCommande(true);
+                ActiverSaisieCommande(true);
 
-            btnAjouterCommande.Enabled = false;
-            btnModifierCommande.Enabled = false;
-            btnSupprimerCommande.Enabled = false;
-            btnEnregistrerCommande.Enabled = true;
-            btnAnnulerCommande.Enabled = true;
+                btnAjouterCommande.Enabled = false;
+                btnModifierCommande.Enabled = false;
+                btnSupprimerCommande.Enabled = false;
+                btnEnregistrerCommande.Enabled = true;
+                btnAnnulerCommande.Enabled = true;
         }
 
         private string GetIdSuiviFromLibelle(string libelle)
@@ -2535,104 +2667,106 @@ namespace MediaTekDocuments.view
 
         private void btnEnregistrerCommande_Click(object sender, EventArgs e)
         {
-            if (idDocumentSelectionne == "")
-            {
-                MessageBox.Show("Aucun document sélectionné.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (idDocumentSelectionne == "")
+                {
+                    MessageBox.Show("Aucun document sélectionné.");
+                    return;
+                }
 
-            if (txtNumeroCommande.Text.Trim() == "" ||
-                txtMontantCommande.Text.Trim() == "" ||
-                txtNbExemplairesCommande.Text.Trim() == "" ||
-                cbxSuiviCommande.Text.Trim() == "")
-            {
-                MessageBox.Show("Tous les champs sont obligatoires.");
-                return;
-            }
+                if (txtNumeroCommande.Text.Trim() == "" ||
+                    txtMontantCommande.Text.Trim() == "" ||
+                    txtNbExemplairesCommande.Text.Trim() == "" ||
+                    cbxSuiviCommande.Text.Trim() == "")
+                {
+                    MessageBox.Show("Tous les champs sont obligatoires.");
+                    return;
+                }
 
-            if (!double.TryParse(txtMontantCommande.Text.Trim(), out double montant))
-            {
-                MessageBox.Show("Le montant est invalide.");
-                return;
-            }
+                if (!double.TryParse(txtMontantCommande.Text.Trim(), out double montant))
+                {
+                    MessageBox.Show("Le montant est invalide.");
+                    return;
+                }
 
-            if (!int.TryParse(txtNbExemplairesCommande.Text.Trim(), out int nbExemplaires) || nbExemplaires <= 0)
-            {
-                MessageBox.Show("Le nombre d'exemplaires est invalide.");
-                return;
-            }
+                if (!int.TryParse(txtNbExemplairesCommande.Text.Trim(), out int nbExemplaires) || nbExemplaires <= 0)
+                {
+                    MessageBox.Show("Le nombre d'exemplaires est invalide.");
+                    return;
+                }
 
-            string idSuivi = GetIdSuiviFromLibelle(cbxSuiviCommande.Text.Trim());
+                string idSuivi = GetIdSuiviFromLibelle(cbxSuiviCommande.Text.Trim());
 
-            if (idSuivi == "")
-            {
-                MessageBox.Show("Le suivi est invalide.");
-                return;
-            }
+                if (idSuivi == "")
+                {
+                    MessageBox.Show("Le suivi est invalide.");
+                    return;
+                }
 
-            CommandeDocument commande = new CommandeDocument(
-                txtNumeroCommande.Text.Trim(),
-                dtpDateCommande.Value.ToString("yyyy-MM-dd"),
-                montant,
-                nbExemplaires,
-                idDocumentSelectionne,
-                idSuivi,
-                cbxSuiviCommande.Text.Trim()
-            );
+                CommandeDocument commande = new CommandeDocument(
+                    txtNumeroCommande.Text.Trim(),
+                    dtpDateCommande.Value.ToString("yyyy-MM-dd"),
+                    montant,
+                    nbExemplaires,
+                    idDocumentSelectionne,
+                    idSuivi,
+                    cbxSuiviCommande.Text.Trim()
+                );
 
-            bool ok = false;
+                bool ok = false;
 
-            if (enCoursAjoutCommande)
-            {
-                ok = controller.CreerCommandeDocument(commande);
-            }
-            else if (enCoursModificationCommande)
-            {
-                ok = controller.ModifierCommandeDocument(commande);
-            }
-
-            if (ok)
-            {
-                MessageBox.Show("Enregistrement effectué.");
-                ChargerCommandesDocument(idDocumentSelectionne);
-                ReinitialiserCommande();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de l'enregistrement.");
-            }
-        }
-
-        private void btnSupprimerCommande_Click(object sender, EventArgs e)
-        {
-            if (txtNumeroCommande.Text.Trim() == "")
-            {
-                MessageBox.Show("Sélectionnez une commande.");
-                return;
-            }
-
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous supprimer cette commande ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (rep == DialogResult.Yes)
-            {
-                bool ok = controller.SupprimerCommandeDocument(txtNumeroCommande.Text);
+                if (enCoursAjoutCommande)
+                {
+                    ok = controller.CreerCommandeDocument(commande);
+                }
+                else if (enCoursModificationCommande)
+                {
+                    ok = controller.ModifierCommandeDocument(commande);
+                }
 
                 if (ok)
                 {
-                    MessageBox.Show("Suppression effectuée.");
+                    MessageBox.Show("Enregistrement effectué.");
                     ChargerCommandesDocument(idDocumentSelectionne);
                     ReinitialiserCommande();
                 }
                 else
                 {
-                    MessageBox.Show("Suppression impossible.");
+                    MessageBox.Show("Erreur lors de l'enregistrement.");
                 }
-            }
+        }
+
+        private void btnSupprimerCommande_Click(object sender, EventArgs e)
+        {
+            if (!VerifierDroitEcriture()) return;
+                if (txtNumeroCommande.Text.Trim() == "")
+                {
+                    MessageBox.Show("Sélectionnez une commande.");
+                    return;
+                }
+
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous supprimer cette commande ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (rep == DialogResult.Yes)
+                {
+                    bool ok = controller.SupprimerCommandeDocument(txtNumeroCommande.Text);
+
+                    if (ok)
+                    {
+                        MessageBox.Show("Suppression effectuée.");
+                        ChargerCommandesDocument(idDocumentSelectionne);
+                        ReinitialiserCommande();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Suppression impossible.");
+                    }
+                }
         }
 
         private void btnAnnulerCommande_Click(object sender, EventArgs e)
@@ -2919,126 +3053,130 @@ namespace MediaTekDocuments.view
 
         private void btnAjouterCommandeRevue_Click(object sender, EventArgs e)
         {
-            if (idRevueSelectionnee == "")
-            {
-                MessageBox.Show("Sélectionnez d'abord une revue.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (idRevueSelectionnee == "")
+                {
+                    MessageBox.Show("Sélectionnez d'abord une revue.");
+                    return;
+                }
 
-            enCoursAjoutCommandeRevue = true;
-            enCoursModificationCommandeRevue = false;
+                enCoursAjoutCommandeRevue = true;
+                enCoursModificationCommandeRevue = false;
 
-            ViderChampsCommandeRevue();
-            ActiverSaisieCommandeRevue(true);
+                ViderChampsCommandeRevue();
+                ActiverSaisieCommandeRevue(true);
 
-            btnAjouterCommandeRevue.Enabled = false;
-            btnModifierCommandeRevue.Enabled = false;
-            btnSupprimerCommandeRevue.Enabled = false;
-            btnEnregistrerCommandeRevue.Enabled = true;
-            btnAnnulerCommandeRevue.Enabled = true;
+                btnAjouterCommandeRevue.Enabled = false;
+                btnModifierCommandeRevue.Enabled = false;
+                btnSupprimerCommandeRevue.Enabled = false;
+                btnEnregistrerCommandeRevue.Enabled = true;
+                btnAnnulerCommandeRevue.Enabled = true;
         }
 
         private void btnModifierCommandeRevue_Click(object sender, EventArgs e)
         {
-            if (txtNumeroCommandeRevue.Text.Trim() == "")
-            {
-                MessageBox.Show("Sélectionnez une commande.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (txtNumeroCommandeRevue.Text.Trim() == "")
+                {
+                    MessageBox.Show("Sélectionnez une commande.");
+                    return;
+                }
 
-            enCoursAjoutCommandeRevue = false;
-            enCoursModificationCommandeRevue = true;
+                enCoursAjoutCommandeRevue = false;
+                enCoursModificationCommandeRevue = true;
 
-            ActiverSaisieCommandeRevue(true);
+                ActiverSaisieCommandeRevue(true);
 
-            btnAjouterCommandeRevue.Enabled = false;
-            btnModifierCommandeRevue.Enabled = false;
-            btnSupprimerCommandeRevue.Enabled = false;
-            btnEnregistrerCommandeRevue.Enabled = true;
-            btnAnnulerCommandeRevue.Enabled = true;
+                btnAjouterCommandeRevue.Enabled = false;
+                btnModifierCommandeRevue.Enabled = false;
+                btnSupprimerCommandeRevue.Enabled = false;
+                btnEnregistrerCommandeRevue.Enabled = true;
+                btnAnnulerCommandeRevue.Enabled = true;
         }
 
         private void btnSupprimerCommandeRevue_Click(object sender, EventArgs e)
         {
-            if (txtNumeroCommandeRevue.Text.Trim() == "")
-            {
-                MessageBox.Show("Sélectionnez une commande.");
-                return;
-            }
+            if (!VerifierDroitEcriture()) return;
+                if (txtNumeroCommandeRevue.Text.Trim() == "")
+                {
+                    MessageBox.Show("Sélectionnez une commande.");
+                    return;
+                }
 
-            DialogResult rep = MessageBox.Show(
-                "Voulez-vous supprimer cet abonnement ?",
-                "Confirmation",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                DialogResult rep = MessageBox.Show(
+                    "Voulez-vous supprimer cet abonnement ?",
+                    "Confirmation",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
-            if (rep == DialogResult.Yes)
-            {
-                bool ok = controller.SupprimerCommandeRevue(txtNumeroCommandeRevue.Text.Trim());
+                if (rep == DialogResult.Yes)
+                {
+                    bool ok = controller.SupprimerCommandeRevue(txtNumeroCommandeRevue.Text.Trim());
+
+                    if (ok)
+                    {
+                        MessageBox.Show("Suppression effectuée.");
+                        ChargerCommandesRevue(idRevueSelectionnee);
+                        ReinitialiserCommandeRevue();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Suppression impossible.");
+                    }
+                }
+        }
+
+        private void btnEnregistrerCommandeRevue_Click(object sender, EventArgs e)
+        {
+            if (!VerifierDroitEcriture()) return;
+                if (idRevueSelectionnee == "")
+                {
+                    MessageBox.Show("Aucune revue sélectionnée.");
+                    return;
+                }
+
+                if (txtNumeroCommandeRevue.Text.Trim() == "" || txtMontantCommandeRevue.Text.Trim() == "")
+                {
+                    MessageBox.Show("Tous les champs sont obligatoires.");
+                    return;
+                }
+
+                if (!double.TryParse(txtMontantCommandeRevue.Text.Trim(), out double montant))
+                {
+                    MessageBox.Show("Le montant est invalide.");
+                    return;
+                }
+
+                CommandeRevue commande = new CommandeRevue(
+                    txtNumeroCommandeRevue.Text.Trim(),
+                    dtpDateCommandeRevue.Value.ToString("yyyy-MM-dd"),
+                    dtpDateFinAbonnement.Value.ToString("yyyy-MM-dd"),
+                    montant,
+                    idRevueSelectionnee
+                );
+
+                bool ok = false;
+
+                if (enCoursAjoutCommandeRevue)
+                {
+                    ok = controller.CreerCommandeRevue(commande);
+                }
+                else if (enCoursModificationCommandeRevue)
+                {
+                    ok = controller.ModifierCommandeRevue(commande);
+                }
 
                 if (ok)
                 {
-                    MessageBox.Show("Suppression effectuée.");
+                    MessageBox.Show("Enregistrement effectué.");
                     ChargerCommandesRevue(idRevueSelectionnee);
                     ReinitialiserCommandeRevue();
                 }
                 else
                 {
-                    MessageBox.Show("Suppression impossible.");
+                    MessageBox.Show("Erreur lors de l'enregistrement.");
                 }
-            }
-        }
-
-        private void btnEnregistrerCommandeRevue_Click(object sender, EventArgs e)
-        {
-            if (idRevueSelectionnee == "")
-            {
-                MessageBox.Show("Aucune revue sélectionnée.");
-                return;
-            }
-
-            if (txtNumeroCommandeRevue.Text.Trim() == "" || txtMontantCommandeRevue.Text.Trim() == "")
-            {
-                MessageBox.Show("Tous les champs sont obligatoires.");
-                return;
-            }
-
-            if (!double.TryParse(txtMontantCommandeRevue.Text.Trim(), out double montant))
-            {
-                MessageBox.Show("Le montant est invalide.");
-                return;
-            }
-
-            CommandeRevue commande = new CommandeRevue(
-                txtNumeroCommandeRevue.Text.Trim(),
-                dtpDateCommandeRevue.Value.ToString("yyyy-MM-dd"),
-                dtpDateFinAbonnement.Value.ToString("yyyy-MM-dd"),
-                montant,
-                idRevueSelectionnee
-            );
-
-            bool ok = false;
-
-            if (enCoursAjoutCommandeRevue)
-            {
-                ok = controller.CreerCommandeRevue(commande);
-            }
-            else if (enCoursModificationCommandeRevue)
-            {
-                ok = controller.ModifierCommandeRevue(commande);
-            }
-
-            if (ok)
-            {
-                MessageBox.Show("Enregistrement effectué.");
-                ChargerCommandesRevue(idRevueSelectionnee);
-                ReinitialiserCommandeRevue();
-            }
-            else
-            {
-                MessageBox.Show("Erreur lors de l'enregistrement.");
-            }
         }
 
         private void btnAnnulerCommandeRevue_Click(object sender, EventArgs e)
