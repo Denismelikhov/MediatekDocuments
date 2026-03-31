@@ -263,35 +263,34 @@ namespace MediaTekDocuments.dal
         /// <param name="message">information envoyée dans l'url</param>
         /// <param name="parametres">paramètres à envoyer dans le body, au format "chp1=val1&chp2=val2&..."</param>
         /// <returns>liste d'objets récupérés (ou liste vide)</returns>
-        private List<T> TraitementRecup<T> (String methode, String message, String parametres)
+        private List<T> TraitementRecup<T>(string methode, string message, string parametres)
         {
-            // trans
-            List<T> liste = new List<T>();
             try
             {
                 JObject retour = api.RecupDistant(methode, message, parametres);
-                // extraction du code retourné
-                String code = (String)retour["code"];
-                if (code.Equals("200"))
+                string code = (string)retour["code"];
+
+                if (code == "200")
                 {
-                    // dans le cas du GET (select), récupération de la liste d'objets
                     if (methode.Equals(GET))
                     {
-                        String resultString = JsonConvert.SerializeObject(retour["result"]);
-                        // construction de la liste d'objets à partir du retour de l'api
-                        liste = JsonConvert.DeserializeObject<List<T>>(resultString, new CustomBooleanJsonConverter());
+                        string resultString = JsonConvert.SerializeObject(retour["result"]);
+                        return JsonConvert.DeserializeObject<List<T>>(resultString, new CustomBooleanJsonConverter());
                     }
+
+                    return new List<T>();
                 }
                 else
                 {
-                    LogErreur("code erreur = " + code + " message = " + (String)retour["message"]);
+                    LogErreur("code erreur = " + code + " message = " + (string)retour["message"]);
+                    return null;
                 }
-            }catch(Exception e)
-            {
-                LogErreur("Erreur lors de l'accès à l'API : "+e.Message);
-                Environment.Exit(0);
             }
-            return liste;
+            catch (Exception e)
+            {
+                LogErreur("Erreur lors de l'accès à l'API : " + e.Message);
+                return null;
+            }
         }
 
         /// <summary>
@@ -875,12 +874,13 @@ namespace MediaTekDocuments.dal
                 numero = numero
             };
 
+            string jsonIdDocument = convertToJson("id", idDocument);
             string jsonExemplaire = JsonConvert.SerializeObject(data);
             string parametres = "champs=" + Uri.EscapeDataString(jsonExemplaire);
 
             try
             {
-                List<Exemplaire> liste = TraitementRecup<Exemplaire>(DELETE, "exemplaire/" + idDocument, parametres);
+                List<Exemplaire> liste = TraitementRecup<Exemplaire>(DELETE, "exemplaire/" + jsonIdDocument, parametres);
                 return (liste != null);
             }
             catch (Exception ex)
