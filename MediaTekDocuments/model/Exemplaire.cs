@@ -13,6 +13,21 @@ namespace MediaTekDocuments.model
         public string IdEtat { get; set; }
         public string Id { get; set; }
 
+        public string Etat
+        {
+            get
+            {
+                switch (IdEtat)
+                {
+                    case "00001": return "neuf";
+                    case "00002": return "usagé";
+                    case "00003": return "détérioré";
+                    case "00004": return "inutilisable";
+                    default: return "";
+                }
+            }
+        }
+
         public Exemplaire(int numero, DateTime dateAchat, string photo, string idEtat, string idDocument)
         {
             this.Numero = numero;
@@ -21,6 +36,5 @@ namespace MediaTekDocuments.model
             this.IdEtat = idEtat;
             this.Id = idDocument;
         }
-
     }
 }

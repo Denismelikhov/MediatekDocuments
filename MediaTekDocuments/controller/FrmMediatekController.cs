@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using MediaTekDocuments.dal;
 using MediaTekDocuments.model;
-using MediaTekDocuments.dal;
+using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace MediaTekDocuments.controller
 {
@@ -13,6 +14,11 @@ namespace MediaTekDocuments.controller
         /// Objet d'accès aux données
         /// </summary>
         private readonly Access access;
+
+        /// <summary>
+        /// Objet d'accès aux états d'exemplaires
+        /// </summary>
+        private readonly BindingSource bdgEtats = new BindingSource();
 
         /// <summary>
         /// Récupération de l'instance unique d'accès aux données
@@ -282,6 +288,46 @@ namespace MediaTekDocuments.controller
         public List<CommandeRevue> GetCommandesRevueExpirationProche()
         {
             return access.GetCommandesRevueExpirationProche();
+        }
+
+        /// <summary>
+        /// récupère les exemplaires d'un document
+        /// </summary>
+        /// <param name="idDocument">id du document concerné</param>
+        /// <returns>Liste d'objets Exemplaire</returns>
+        public List<Exemplaire> GetExemplairesDocument(string idDocument)
+        {
+            return access.GetExemplairesDocument(idDocument);
+        }
+
+        /// <summary>
+        /// récupère les états possibles d'un exemplaire
+        /// </summary>
+        /// <returns>Liste d'objets Categorie</returns>
+        public List<Categorie> GetAllEtats()
+        {
+            return access.GetAllEtats();
+        }
+
+        /// <summary>
+        /// modifie un exemplaire dans la bdd
+        /// </summary>
+        /// <param name="exemplaire">objet Exemplaire concerné</param>
+        /// <returns>true si la modification a pu se faire</returns>
+        public bool ModifierExemplaire(Exemplaire exemplaire)
+        {
+            return access.ModifierExemplaire(exemplaire);
+        }
+
+        /// <summary>
+        /// supprime un exemplaire dans la bdd
+        /// </summary>
+        /// <param name="idDocument">id du document concerné</param>
+        /// <param name="numero">numéro de l'exemplaire</param>
+        /// <returns>true si la suppression a pu se faire</returns>
+        public bool SupprimerExemplaire(string idDocument, int numero)
+        {
+            return access.SupprimerExemplaire(idDocument, numero);
         }
     }
 }

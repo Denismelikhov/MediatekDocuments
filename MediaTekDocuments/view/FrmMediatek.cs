@@ -1675,17 +1675,38 @@ namespace MediaTekDocuments.view
         #region Onglet Paarutions
         private readonly BindingSource bdgExemplairesListe = new BindingSource();
         private List<Exemplaire> lesExemplaires = new List<Exemplaire>();
+
+        private string idDocumentExemplaireSelectionne = "";
         const string ETATNEUF = "00001";
 
         /// <summary>
-        /// Ouverture de l'onglet : récupère le revues et vide tous les champs.
+        /// Ouverture de l'onglet : récupère les documents et vide tous les champs.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void tabReceptionRevue_Enter(object sender, EventArgs e)
         {
             lesRevues = controller.GetAllRevues();
+
+            idDocumentExemplaireSelectionne = "";
             txbReceptionRevueNumero.Text = "";
+            txbReceptionRevueTitre.Text = "";
+            txbReceptionRevueGenre.Text = "";
+            txbReceptionRevuePublic.Text = "";
+            txbReceptionRevueRayon.Text = "";
+            txbReceptionRevueImage.Text = "";
+            txbReceptionRevuePeriodicite.Text = "";
+            txbReceptionRevueDelaiMiseADispo.Text = "";
+
+            pcbReceptionRevueImage.Image = null;
+            pcbReceptionExemplaireRevueImage.Image = null;
+
+            dgvReceptionExemplairesListe.DataSource = null;
+            cbxReceptionExemplaireEtat.SelectedIndex = -1;
+
+            cbxTypeDocumentExemplaire.SelectedItem = "Revue";
+
+            AccesReceptionExemplaireGroupBox(false);
         }
 
         /// <summary>
@@ -1698,37 +1719,176 @@ namespace MediaTekDocuments.view
             {
                 bdgExemplairesListe.DataSource = exemplaires;
                 dgvReceptionExemplairesListe.DataSource = bdgExemplairesListe;
-                dgvReceptionExemplairesListe.Columns["idEtat"].Visible = false;
-                dgvReceptionExemplairesListe.Columns["id"].Visible = false;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("IdEtat"))
+                    dgvReceptionExemplairesListe.Columns["IdEtat"].Visible = false;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("Id"))
+                    dgvReceptionExemplairesListe.Columns["Id"].Visible = false;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("Etat"))
+                    dgvReceptionExemplairesListe.Columns["Etat"].HeaderText = "Etat";
+
                 dgvReceptionExemplairesListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-                dgvReceptionExemplairesListe.Columns["numero"].DisplayIndex = 0;
-                dgvReceptionExemplairesListe.Columns["dateAchat"].DisplayIndex = 1;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("Numero"))
+                    dgvReceptionExemplairesListe.Columns["Numero"].DisplayIndex = 0;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("DateAchat"))
+                    dgvReceptionExemplairesListe.Columns["DateAchat"].DisplayIndex = 1;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("Etat"))
+                    dgvReceptionExemplairesListe.Columns["Etat"].DisplayIndex = 2;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("Photo"))
+                    dgvReceptionExemplairesListe.Columns["Photo"].DisplayIndex = 3;
             }
             else
             {
                 bdgExemplairesListe.DataSource = null;
+                dgvReceptionExemplairesListe.DataSource = null;
             }
         }
 
         /// <summary>
-        /// Recherche d'un numéro de revue et affiche ses informations
+        /// Recherche d'un numéro de revue OU d'un document de type livre/dvd et affiche ses informations
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btnReceptionRechercher_Click(object sender, EventArgs e)
         {
-            if (!txbReceptionRevueNumero.Text.Equals(""))
+            string recherche = txbReceptionRevueNumero.Text.Trim().ToLower();
+
+            if (cbxTypeDocumentExemplaire.Text == "")
             {
-                Revue revue = lesRevues.Find(x => x.Id.Equals(txbReceptionRevueNumero.Text));
+                MessageBox.Show("Sélectionnez un type de document.");
+                return;
+            }
+
+            if (cbxTypeDocumentExemplaire.Text == "Revue")
+            {
+                Revue revue = controller.GetAllRevues()
+                    .Find(r => r.Id.ToLower().Equals(recherche));
+
                 if (revue != null)
                 {
-                    AfficheReceptionRevueInfos(revue);
+                    AfficherInfosDocumentExemplaire(
+                        revue.Id,
+                        revue.Titre,
+                        revue.Genre,
+                        revue.Public,
+                        revue.Rayon,
+                        revue.Image,
+                        revue.Periodicite,
+                        revue.DelaiMiseADispo.ToString()
+                    );
+
+                    idDocumentExemplaireSelectionne = revue.Id;
+                    AfficheReceptionExemplairesDocument();
                 }
                 else
                 {
-                    MessageBox.Show("numéro introuvable");
+                    MessageBox.Show("Document introuvable.");
                 }
             }
+            else if (cbxTypeDocumentExemplaire.Text == "Livre")
+            {
+                Livre livre = controller.GetAllLivres()
+                    .Find(l => l.Id.ToLower().Equals(recherche));
+
+                if (livre != null)
+                {
+                    AfficherInfosDocumentExemplaire(
+                        livre.Id,
+                        livre.Titre,
+                        livre.Genre,
+                        livre.Public,
+                        livre.Rayon,
+                        livre.Image,
+                        "",
+                        ""
+                    );
+
+                    idDocumentExemplaireSelectionne = livre.Id;
+                    AfficheReceptionExemplairesDocument();
+                }
+                else
+                {
+                    MessageBox.Show("Document introuvable.");
+                }
+            }
+            else if (cbxTypeDocumentExemplaire.Text == "DVD")
+            {
+                Dvd dvd = controller.GetAllDvd()
+                    .Find(d => d.Id.ToLower().Equals(recherche));
+
+                if (dvd != null)
+                {
+                    AfficherInfosDocumentExemplaire(
+                        dvd.Id,
+                        dvd.Titre,
+                        dvd.Genre,
+                        dvd.Public,
+                        dvd.Rayon,
+                        dvd.Image,
+                        "",
+                        ""
+                    );
+
+                    idDocumentExemplaireSelectionne = dvd.Id;
+                    AfficheReceptionExemplairesDocument();
+                }
+                else
+                {
+                    MessageBox.Show("Document introuvable.");
+                }
+            }
+        }
+
+        private void AfficherInfosDocumentExemplaire(
+            string id,
+            string titre,
+            string genre,
+            string lePublic,
+            string rayon,
+            string image,
+            string periodicite,
+            string delaiMiseADispo)
+        {
+            txbReceptionRevueNumero.Text = id;
+            txbReceptionRevueTitre.Text = titre;
+            txbReceptionRevueGenre.Text = genre;
+            txbReceptionRevuePublic.Text = lePublic;
+            txbReceptionRevueRayon.Text = rayon;
+            txbReceptionRevueImage.Text = image;
+            txbReceptionRevuePeriodicite.Text = periodicite;
+            txbReceptionRevueDelaiMiseADispo.Text = delaiMiseADispo;
+
+            try
+            {
+                pcbReceptionRevueImage.Image = Image.FromFile(image);
+            }
+            catch
+            {
+                pcbReceptionRevueImage.Image = null;
+            }
+        }
+
+        private void cbxTypeDocumentExemplaire_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            idDocumentExemplaireSelectionne = "";
+            txbReceptionRevueNumero.Text = "";
+            txbReceptionRevueTitre.Text = "";
+            txbReceptionRevueGenre.Text = "";
+            txbReceptionRevuePublic.Text = "";
+            txbReceptionRevueRayon.Text = "";
+            txbReceptionRevueImage.Text = "";
+            txbReceptionRevuePeriodicite.Text = "";
+            txbReceptionRevueDelaiMiseADispo.Text = "";
+            pcbReceptionRevueImage.Image = null;
+
+            dgvReceptionExemplairesListe.DataSource = null;
+            AccesReceptionExemplaireGroupBox(false);
         }
 
         /// <summary>
@@ -1776,16 +1936,25 @@ namespace MediaTekDocuments.view
                 pcbReceptionRevueImage.Image = null;
             }
             // affiche la liste des exemplaires de la revue
-            AfficheReceptionExemplairesRevue();
+            AfficheReceptionExemplairesDocument();
         }
 
         /// <summary>
-        /// Récupère et affiche les exemplaires d'une revue
+        /// Récupère et affiche les exemplaires d'un document
         /// </summary>
-        private void AfficheReceptionExemplairesRevue()
+        private void AfficheReceptionExemplairesDocument()
         {
-            string idDocuement = txbReceptionRevueNumero.Text;
-            lesExemplaires = controller.GetExemplairesRevue(idDocuement);
+            string idDocument = idDocumentExemplaireSelectionne.Trim();
+
+            if (idDocument == "")
+            {
+                lesExemplaires = new List<Exemplaire>();
+                RemplirReceptionExemplairesListe(lesExemplaires);
+                AccesReceptionExemplaireGroupBox(false);
+                return;
+            }
+
+            lesExemplaires = controller.GetExemplairesRevue(idDocument);
             RemplirReceptionExemplairesListe(lesExemplaires);
             AccesReceptionExemplaireGroupBox(true);
         }
@@ -1852,7 +2021,7 @@ namespace MediaTekDocuments.view
                     Exemplaire exemplaire = new Exemplaire(numero, dateAchat, photo, idEtat, idDocument);
                     if (controller.CreerExemplaire(exemplaire))
                     {
-                        AfficheReceptionExemplairesRevue();
+                        AfficheReceptionExemplairesDocument();
                     }
                     else
                     {
@@ -1903,22 +2072,140 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void dgvReceptionExemplairesListe_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvReceptionExemplairesListe.CurrentCell != null)
+            if (dgvReceptionExemplairesListe.CurrentCell != null && bdgExemplairesListe.Position >= 0)
             {
-                Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
-                string image = exemplaire.Photo;
                 try
                 {
-                    pcbReceptionExemplaireRevueImage.Image = Image.FromFile(image);
+                    Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
+
+                    try
+                    {
+                        pcbReceptionExemplaireRevueImage.Image = Image.FromFile(exemplaire.Photo);
+                    }
+                    catch
+                    {
+                        pcbReceptionExemplaireRevueImage.Image = null;
+                    }
+
+                    switch (exemplaire.IdEtat)
+                    {
+                        case "00001":
+                            cbxReceptionExemplaireEtat.SelectedIndex = 0;
+                            break;
+                        case "00002":
+                            cbxReceptionExemplaireEtat.SelectedIndex = 1;
+                            break;
+                        case "00003":
+                            cbxReceptionExemplaireEtat.SelectedIndex = 2;
+                            break;
+                        case "00004":
+                            cbxReceptionExemplaireEtat.SelectedIndex = 3;
+                            break;
+                        default:
+                            cbxReceptionExemplaireEtat.SelectedIndex = -1;
+                            break;
+                    }
                 }
                 catch
                 {
                     pcbReceptionExemplaireRevueImage.Image = null;
+                    cbxReceptionExemplaireEtat.SelectedIndex = -1;
                 }
             }
             else
             {
                 pcbReceptionExemplaireRevueImage.Image = null;
+                cbxReceptionExemplaireEtat.SelectedIndex = -1;
+            }
+        }
+
+        private void btnModifierEtatExemplaire_Click(object sender, EventArgs e)
+        {
+            if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
+            {
+                MessageBox.Show("Sélectionnez un exemplaire.");
+                return;
+            }
+
+            if (cbxReceptionExemplaireEtat.SelectedIndex < 0)
+            {
+                MessageBox.Show("Sélectionnez un état.");
+                return;
+            }
+
+            Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
+
+            string idEtat = "";
+            switch (cbxReceptionExemplaireEtat.SelectedIndex)
+            {
+                case 0:
+                    idEtat = "00001";
+                    break;
+                case 1:
+                    idEtat = "00002";
+                    break;
+                case 2:
+                    idEtat = "00003";
+                    break;
+                case 3:
+                    idEtat = "00004";
+                    break;
+                default:
+                    MessageBox.Show("Etat invalide.");
+                    return;
+            }
+
+            Exemplaire exemplaireModifie = new Exemplaire(
+                exemplaire.Numero,
+                exemplaire.DateAchat,
+                exemplaire.Photo,
+                idEtat,
+                exemplaire.Id
+            );
+
+            bool ok = controller.ModifierExemplaire(exemplaireModifie);
+
+            if (ok)
+            {
+                MessageBox.Show("Modification effectuée.");
+                AfficheReceptionExemplairesDocument();
+            }
+            else
+            {
+                MessageBox.Show("Erreur lors de la modification.");
+            }
+        }
+
+        private void btnSupprimerExemplaire_Click(object sender, EventArgs e)
+        {
+            if (dgvReceptionExemplairesListe.CurrentCell == null || bdgExemplairesListe.Position < 0)
+            {
+                MessageBox.Show("Sélectionnez un exemplaire.");
+                return;
+            }
+
+            Exemplaire exemplaire = (Exemplaire)bdgExemplairesListe.List[bdgExemplairesListe.Position];
+
+            DialogResult rep = MessageBox.Show(
+                "Voulez-vous supprimer cet exemplaire ?",
+                "Confirmation",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (rep == DialogResult.Yes)
+            {
+                bool ok = controller.SupprimerExemplaire(exemplaire.Id, exemplaire.Numero);
+
+                if (ok)
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    AfficheReceptionExemplairesDocument();
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la suppression.");
+                }
             }
         }
         #endregion
@@ -2456,8 +2743,6 @@ namespace MediaTekDocuments.view
             btnSupprimerCommandeRevue.Enabled = false;
             btnAjouterCommandeRevue.Enabled = (idRevueSelectionnee != "");
         }
-
-
 
         private void InitOngletAbonnements()
         {

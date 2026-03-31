@@ -722,5 +722,90 @@ namespace MediaTekDocuments.dal
             List<CommandeRevue> lesCommandes = TraitementRecup<CommandeRevue>(GET, "commanderevueexpiration", null);
             return lesCommandes;
         }
+
+        /// <summary>
+        /// récupère les exemplaires d'un document
+        /// </summary>
+        /// <param name="idDocument">id du document concerné</param>
+        /// <returns>Liste d'objets Exemplaire</returns>
+        public List<Exemplaire> GetExemplairesDocument(string idDocument)
+        {
+            string jsonIdDocument = convertToJson("id", idDocument);
+            List<Exemplaire> lesExemplaires = TraitementRecup<Exemplaire>(GET, "exemplaire/" + jsonIdDocument, null);
+            return lesExemplaires;
+        }
+
+        /// <summary>
+        /// récupère tous les états possibles
+        /// </summary>
+        /// <returns>Liste d'objets Categorie</returns>
+        public List<Categorie> GetAllEtats()
+        {
+            List<Etat> lesEtats = TraitementRecup<Etat>(GET, "etat", null);
+
+            return lesEtats
+                .Select(e => new Categorie(e.Id, e.Libelle))
+                .ToList();
+        }
+
+        /// <summary>
+        /// modifie l'état d'un exemplaire
+        /// </summary>
+        /// <param name="exemplaire">exemplaire concerné</param>
+        /// <returns>true si la modification a pu se faire</returns>
+        public bool ModifierExemplaire(Exemplaire exemplaire)
+        {
+            var data = new
+            {
+                id = exemplaire.Id,
+                numero = exemplaire.Numero,
+                dateAchat = exemplaire.DateAchat,
+                photo = exemplaire.Photo,
+                idEtat = exemplaire.IdEtat
+            };
+
+            string jsonExemplaire = JsonConvert.SerializeObject(data, new CustomDateTimeConverter());
+            string parametres = "champs=" + Uri.EscapeDataString(jsonExemplaire);
+
+            try
+            {
+                List<Exemplaire> liste = TraitementRecup<Exemplaire>(PUT, "exemplaire/" + exemplaire.Id, parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// supprime un exemplaire
+        /// </summary>
+        /// <param name="idDocument">id du document</param>
+        /// <param name="numero">numéro de l'exemplaire</param>
+        /// <returns>true si la suppression a pu se faire</returns>
+        public bool SupprimerExemplaire(string idDocument, int numero)
+        {
+            var data = new
+            {
+                id = idDocument,
+                numero = numero
+            };
+
+            string jsonExemplaire = JsonConvert.SerializeObject(data);
+            string parametres = "champs=" + Uri.EscapeDataString(jsonExemplaire);
+
+            try
+            {
+                List<Exemplaire> liste = TraitementRecup<Exemplaire>(DELETE, "exemplaire/" + idDocument, parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
     }
 }
