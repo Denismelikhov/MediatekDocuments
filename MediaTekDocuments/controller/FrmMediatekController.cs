@@ -204,5 +204,84 @@ namespace MediaTekDocuments.controller
         {
             return access.ModifierRevue(revue);
         }
+
+        /// <summary>
+        /// Demande la création d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="commande">commande concernée</param>
+        /// <returns>true si création effectuée</returns>
+        public bool CreerCommandeDocument(CommandeDocument commande)
+        {
+            return access.CreerCommandeDocument(commande);
+        }
+
+        /// <summary>
+        /// Demande la modification d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="commande">commande concernée</param>
+        /// <returns>true si modification effectuée</returns>
+        public bool ModifierCommandeDocument(CommandeDocument commande)
+        {
+            return access.ModifierCommandeDocument(commande);
+        }
+
+        /// <summary>
+        /// Demande la suppression d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="idCommande">id de la commande</param>
+        /// <returns>true si suppression effectuée</returns>
+        public bool SupprimerCommandeDocument(string idCommande)
+        {
+            return access.SupprimerCommandeDocument(idCommande);
+        }
+
+        /// <summary>
+        /// récupère les commandes d'une revue
+        /// </summary>
+        /// <param name="idRevue">id de la revue concernée</param>
+        /// <returns>Liste d'objets CommandeRevue</returns>
+        public List<CommandeRevue> GetCommandesRevue(string idRevue)
+        {
+            return access.GetCommandesRevue(idRevue);
+        }
+
+        /// <summary>
+        /// crée une commande de revue dans la bdd
+        /// </summary>
+        /// <param name="commande">objet CommandeRevue concerné</param>
+        /// <returns>true si la création a pu se faire</returns>
+        public bool CreerCommandeRevue(CommandeRevue commande)
+        {
+            return access.CreerCommandeRevue(commande);
+        }
+
+        /// <summary>
+        /// modifie une commande de revue dans la bdd
+        /// </summary>
+        /// <param name="commande">objet CommandeRevue concerné</param>
+        /// <returns>true si la modification a pu se faire</returns>
+        public bool ModifierCommandeRevue(CommandeRevue commande)
+        {
+            return access.ModifierCommandeRevue(commande);
+        }
+
+        /// <summary>
+        /// supprime une commande de revue dans la bdd
+        /// </summary>
+        /// <param name="idCommande">id de la commande concernée</param>
+        /// <returns>true si la suppression a pu se faire</returns>
+        public bool SupprimerCommandeRevue(string idCommande)
+        {
+            return access.SupprimerCommandeRevue(idCommande);
+        }
+
+        /// <summary>
+        /// récupère les commandes de revue dont l'abonnement expire dans moins de 30 jours
+        /// </summary>
+        /// <returns>Liste d'objets CommandeRevue</returns>
+        public List<CommandeRevue> GetCommandesRevueExpirationProche()
+        {
+            return access.GetCommandesRevueExpirationProche();
+        }
     }
 }

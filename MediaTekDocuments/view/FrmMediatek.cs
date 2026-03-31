@@ -28,6 +28,8 @@ namespace MediaTekDocuments.view
         {
             InitializeComponent();
             this.controller = new FrmMediatekController();
+            InitialiserOngletCommandes();
+            InitialiserOngletAbonnements();
         }
 
         private Livre RecupererLivreSelectionne()
@@ -1918,6 +1920,845 @@ namespace MediaTekDocuments.view
             {
                 pcbReceptionExemplaireRevueImage.Image = null;
             }
+        }
+        #endregion
+
+        #region Onglet Commandes
+
+        private bool enCoursAjoutCommande = false;
+        private bool enCoursModificationCommande = false;
+        private string idDocumentSelectionne = "";
+
+        private void InitialiserOngletCommandes()
+        {
+            InitOngletCommandes();
+        }
+
+        private void InitOngletCommandes()
+        {
+            txtNumeroCommande.Text = "";
+            txtMontantCommande.Text = "";
+            txtNbExemplairesCommande.Text = "";
+
+            dgvDocumentsCommande.DataSource = null;
+            dgvCommandesDocument.DataSource = null;
+
+            ActiverSaisieCommande(false);
+
+            btnAjouterCommande.Enabled = false;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+            btnEnregistrerCommande.Enabled = false;
+            btnAnnulerCommande.Enabled = false;
+        }
+
+        private void ConfigurerGrillesCommandes()
+        {
+            dgvDocumentsCommande.ReadOnly = true;
+            dgvDocumentsCommande.MultiSelect = false;
+            dgvDocumentsCommande.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDocumentsCommande.AllowUserToAddRows = false;
+            dgvDocumentsCommande.AllowUserToDeleteRows = false;
+            dgvDocumentsCommande.AllowUserToResizeRows = false;
+            dgvDocumentsCommande.RowHeadersVisible = false;
+            dgvDocumentsCommande.AutoGenerateColumns = true;
+            dgvDocumentsCommande.ClearSelection();
+
+            dgvCommandesDocument.ReadOnly = true;
+            dgvCommandesDocument.MultiSelect = false;
+            dgvCommandesDocument.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvCommandesDocument.AllowUserToAddRows = false;
+            dgvCommandesDocument.AllowUserToDeleteRows = false;
+            dgvCommandesDocument.AllowUserToResizeRows = false;
+            dgvCommandesDocument.RowHeadersVisible = false;
+            dgvCommandesDocument.AutoGenerateColumns = true;
+            dgvCommandesDocument.ClearSelection();
+        }
+
+        private void ActiverSaisieCommande(bool actif)
+        {
+            txtNumeroCommande.Enabled = actif;
+            txtMontantCommande.Enabled = actif;
+            txtNbExemplairesCommande.Enabled = actif;
+
+            cbxSuiviCommande.Enabled = actif;
+            dtpDateCommande.Enabled = actif;
+
+            txtMontantCommande.ReadOnly = !actif;
+            txtNbExemplairesCommande.ReadOnly = !actif;
+
+            txtNumeroCommande.ReadOnly = !enCoursAjoutCommande;
+        }
+
+        private void ReinitialiserCommande()
+        {
+            enCoursAjoutCommande = false;
+            enCoursModificationCommande = false;
+
+            ViderChampsCommande();
+
+            txtNumeroCommande.ReadOnly = true;
+            ActiverSaisieCommande(false);
+
+            btnEnregistrerCommande.Enabled = false;
+            btnAnnulerCommande.Enabled = false;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+            btnAjouterCommande.Enabled = (idDocumentSelectionne != "");
+        }
+
+        private bool CommandeLivreeOuReglee()
+        {
+            string suivi = cbxSuiviCommande.Text.Trim().ToLower();
+            return suivi == "livrée" || suivi == "réglée";
+        }
+
+        private bool CommandeReglee()
+        {
+            string suivi = cbxSuiviCommande.Text.Trim().ToLower();
+            return suivi == "réglée";
+        }
+
+        private void ChargerCommandesDocument(string idDocument)
+        {
+            dgvCommandesDocument.DataSource = controller.GetCommandesDocument(idDocument);
+
+            if (dgvCommandesDocument.Columns.Count > 0)
+            {
+                if (dgvCommandesDocument.Columns.Contains("IdLivreDvd"))
+                    dgvCommandesDocument.Columns["IdLivreDvd"].Visible = false;
+
+                if (dgvCommandesDocument.Columns.Contains("IdSuivi"))
+                    dgvCommandesDocument.Columns["IdSuivi"].Visible = false;
+
+                dgvCommandesDocument.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            }
+
+            btnAjouterCommande.Enabled = true;
+
+            if (dgvCommandesDocument.Rows.Count > 0)
+            {
+                dgvCommandesDocument.ClearSelection();
+                dgvCommandesDocument.Rows[0].Selected = true;
+                dgvCommandesDocument.CurrentCell = dgvCommandesDocument.Rows[0].Cells["Id"];
+
+                AfficherCommandeSelectionnee();
+            }
+            else
+            {
+                ViderChampsCommande();
+                btnModifierCommande.Enabled = false;
+                btnSupprimerCommande.Enabled = false;
+            }
+        }
+        
+        private void AfficherCommandeSelectionnee()
+        {
+            if (dgvCommandesDocument.CurrentRow == null || dgvCommandesDocument.CurrentRow.Cells["Id"].Value == null)
+            {
+                return;
+            }
+
+            txtNumeroCommande.Text = dgvCommandesDocument.CurrentRow.Cells["Id"].Value.ToString();
+
+            if (DateTime.TryParse(dgvCommandesDocument.CurrentRow.Cells["DateCommande"].Value.ToString(), out DateTime dateCommande))
+            {
+                dtpDateCommande.Value = dateCommande;
+            }
+
+            txtMontantCommande.Text = dgvCommandesDocument.CurrentRow.Cells["Montant"].Value.ToString();
+            txtNbExemplairesCommande.Text = dgvCommandesDocument.CurrentRow.Cells["NbExemplaire"].Value.ToString();
+
+            if (dgvCommandesDocument.Columns.Contains("LibelleSuivi"))
+            {
+                cbxSuiviCommande.Text = dgvCommandesDocument.CurrentRow.Cells["LibelleSuivi"].Value.ToString();
+            }
+
+            btnModifierCommande.Enabled = !CommandeReglee();
+            btnSupprimerCommande.Enabled = !CommandeLivreeOuReglee();
+        }
+
+        private void AfficherCommandesDuDocumentSelectionne(int rowIndex)
+        {
+            if (rowIndex < 0 || rowIndex >= dgvDocumentsCommande.Rows.Count)
+            {
+                idDocumentSelectionne = "";
+                dgvCommandesDocument.DataSource = null;
+                ReinitialiserCommande();
+                return;
+            }
+
+            DataGridViewRow row = dgvDocumentsCommande.Rows[rowIndex];
+
+            if (row.Cells["Id"].Value == null)
+            {
+                idDocumentSelectionne = "";
+                dgvCommandesDocument.DataSource = null;
+                ReinitialiserCommande();
+                return;
+            }
+
+            dgvDocumentsCommande.ClearSelection();
+            row.Selected = true;
+            dgvDocumentsCommande.CurrentCell = row.Cells["Id"];
+
+            idDocumentSelectionne = row.Cells["Id"].Value.ToString();
+
+            ChargerCommandesDocument(idDocumentSelectionne);
+
+            btnAjouterCommande.Enabled = true;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+        }
+
+        private void ConfigurerGrilleDocuments()
+        {
+            if (dgvDocumentsCommande.Columns.Count > 0)
+            {
+                if (dgvDocumentsCommande.Columns.Contains("Image"))
+                    dgvDocumentsCommande.Columns["Image"].Visible = false;
+
+                if (dgvDocumentsCommande.Columns.Contains("Id"))
+                    dgvDocumentsCommande.Columns["Id"].HeaderText = "Numéro";
+
+                if (dgvDocumentsCommande.Columns.Contains("Titre"))
+                    dgvDocumentsCommande.Columns["Titre"].HeaderText = "Titre";
+
+                dgvDocumentsCommande.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            }
+        }
+
+        private void dgvCommandesDocument_SelectionChanged(object sender, EventArgs e)
+        {
+            AfficherCommandeSelectionnee();
+        }
+
+        private void dgvCommandesDocument_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            AfficherCommandeSelectionnee();
+        }
+
+        private void dgvDocumentsCommande_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+            AfficherCommandesDuDocumentSelectionne(e.RowIndex);
+        }
+
+        private void dgvCommandesDocument_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+            DataGridViewRow row = dgvCommandesDocument.Rows[e.RowIndex];
+
+            if (row.Cells["Id"].Value == null)
+            {
+                return;
+            }
+
+            dgvCommandesDocument.ClearSelection();
+            row.Selected = true;
+            dgvCommandesDocument.CurrentCell = row.Cells["Id"];
+
+            AfficherCommandeSelectionnee();
+        }
+
+        private bool TransitionSuiviValide(string ancienSuivi, string nouveauSuivi)
+        {
+            if (ancienSuivi == "réglée" && nouveauSuivi != "réglée")
+                return false;
+
+            if (ancienSuivi == "livrée" && (nouveauSuivi == "en cours" || nouveauSuivi == "relancée"))
+                return false;
+
+            return true;
+        }
+
+        private void ViderChampsCommande()
+        {
+            txtNumeroCommande.Text = "";
+            txtMontantCommande.Text = "";
+            txtNbExemplairesCommande.Text = "";
+            cbxSuiviCommande.SelectedIndex = -1;
+            dtpDateCommande.Value = DateTime.Now;
+        }
+
+        private void btnAjouterCommande_Click(object sender, EventArgs e)
+        {
+            if (idDocumentSelectionne == "")
+            {
+                MessageBox.Show("Sélectionnez d'abord un document.");
+                return;
+            }
+
+            enCoursAjoutCommande = true;
+            enCoursModificationCommande = false;
+
+            ViderChampsCommande();
+            ActiverSaisieCommande(true);
+
+            cbxSuiviCommande.Text = "en cours";
+
+            btnAjouterCommande.Enabled = false;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+            btnEnregistrerCommande.Enabled = true;
+            btnAnnulerCommande.Enabled = true;
+        }
+
+        private void btnModifierCommande_Click(object sender, EventArgs e)
+        {
+            if (txtNumeroCommande.Text.Trim() == "")
+            {
+                MessageBox.Show("Sélectionnez une commande.");
+                return;
+            }
+
+            enCoursAjoutCommande = false;
+            enCoursModificationCommande = true;
+
+            ActiverSaisieCommande(true);
+
+            btnAjouterCommande.Enabled = false;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+            btnEnregistrerCommande.Enabled = true;
+            btnAnnulerCommande.Enabled = true;
+        }
+
+        private string GetIdSuiviFromLibelle(string libelle)
+        {
+            switch (libelle)
+            {
+                case "en cours": return "00001";
+                case "relancée": return "00002";
+                case "livrée": return "00003";
+                case "réglée": return "00004";
+                default: return "";
+            }
+        }
+
+        private void btnEnregistrerCommande_Click(object sender, EventArgs e)
+        {
+            if (idDocumentSelectionne == "")
+            {
+                MessageBox.Show("Aucun document sélectionné.");
+                return;
+            }
+
+            if (txtNumeroCommande.Text.Trim() == "" ||
+                txtMontantCommande.Text.Trim() == "" ||
+                txtNbExemplairesCommande.Text.Trim() == "" ||
+                cbxSuiviCommande.Text.Trim() == "")
+            {
+                MessageBox.Show("Tous les champs sont obligatoires.");
+                return;
+            }
+
+            if (!double.TryParse(txtMontantCommande.Text.Trim(), out double montant))
+            {
+                MessageBox.Show("Le montant est invalide.");
+                return;
+            }
+
+            if (!int.TryParse(txtNbExemplairesCommande.Text.Trim(), out int nbExemplaires) || nbExemplaires <= 0)
+            {
+                MessageBox.Show("Le nombre d'exemplaires est invalide.");
+                return;
+            }
+
+            string idSuivi = GetIdSuiviFromLibelle(cbxSuiviCommande.Text.Trim());
+
+            if (idSuivi == "")
+            {
+                MessageBox.Show("Le suivi est invalide.");
+                return;
+            }
+
+            CommandeDocument commande = new CommandeDocument(
+                txtNumeroCommande.Text.Trim(),
+                dtpDateCommande.Value.ToString("yyyy-MM-dd"),
+                montant,
+                nbExemplaires,
+                idDocumentSelectionne,
+                idSuivi,
+                cbxSuiviCommande.Text.Trim()
+            );
+
+            bool ok = false;
+
+            if (enCoursAjoutCommande)
+            {
+                ok = controller.CreerCommandeDocument(commande);
+            }
+            else if (enCoursModificationCommande)
+            {
+                ok = controller.ModifierCommandeDocument(commande);
+            }
+
+            if (ok)
+            {
+                MessageBox.Show("Enregistrement effectué.");
+                ChargerCommandesDocument(idDocumentSelectionne);
+                ReinitialiserCommande();
+            }
+            else
+            {
+                MessageBox.Show("Erreur lors de l'enregistrement.");
+            }
+        }
+
+        private void btnSupprimerCommande_Click(object sender, EventArgs e)
+        {
+            if (txtNumeroCommande.Text.Trim() == "")
+            {
+                MessageBox.Show("Sélectionnez une commande.");
+                return;
+            }
+
+            DialogResult rep = MessageBox.Show(
+                "Voulez-vous supprimer cette commande ?",
+                "Confirmation",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (rep == DialogResult.Yes)
+            {
+                bool ok = controller.SupprimerCommandeDocument(txtNumeroCommande.Text);
+
+                if (ok)
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    ChargerCommandesDocument(idDocumentSelectionne);
+                    ReinitialiserCommande();
+                }
+                else
+                {
+                    MessageBox.Show("Suppression impossible.");
+                }
+            }
+        }
+
+        private void btnAnnulerCommande_Click(object sender, EventArgs e)
+        {
+            ReinitialiserCommande();
+        }
+
+        private void btnRechercherDocumentCommande_Click(object sender, EventArgs e)
+        {
+            string recherche = txtRechercheDocumentCommande.Text.Trim().ToLower();
+
+            if (cbxTypeDocumentCommande.Text == "")
+            {
+                MessageBox.Show("Sélectionnez un type de document.");
+                return;
+            }
+
+            if (cbxTypeDocumentCommande.Text == "Livre")
+            {
+                var livres = controller.GetAllLivres();
+
+                var resultat = livres.Where(l =>
+                    l.Id.ToLower().Contains(recherche) ||
+                    l.Titre.ToLower().Contains(recherche)
+                ).ToList();
+
+                dgvDocumentsCommande.DataSource = resultat;
+            }
+            else if (cbxTypeDocumentCommande.Text == "DVD")
+            {
+                var dvds = controller.GetAllDvd();
+
+                var resultat = dvds.Where(d =>
+                    d.Id.ToLower().Contains(recherche) ||
+                    d.Titre.ToLower().Contains(recherche)
+                ).ToList();
+
+                dgvDocumentsCommande.DataSource = resultat;
+            }
+
+            ConfigurerGrilleDocuments();
+
+            dgvCommandesDocument.DataSource = null;
+            idDocumentSelectionne = "";
+
+            ReinitialiserCommande();
+
+            if (dgvDocumentsCommande.Rows.Count > 0)
+            {
+                AfficherCommandesDuDocumentSelectionne(0);
+            }
+            else
+            {
+                dgvCommandesDocument.DataSource = null;
+                idDocumentSelectionne = "";
+                ReinitialiserCommande();
+            }
+        }
+
+        #endregion
+
+        #region Onglet Abonnements
+
+        private bool enCoursAjoutCommandeRevue = false;
+        private bool enCoursModificationCommandeRevue = false;
+        private string idRevueSelectionnee = "";
+
+        private void InitialiserOngletAbonnements()
+        {
+            ConfigurerGrillesAbonnements();
+            InitOngletAbonnements();
+        }
+        private void tabAbonnements_Enter(object sender, EventArgs e)
+        {
+            InitOngletAbonnements();
+        }
+
+        private void ActiverSaisieCommandeRevue(bool actif)
+        {
+            txtNumeroCommandeRevue.Enabled = actif;
+            txtMontantCommandeRevue.Enabled = actif;
+            dtpDateCommandeRevue.Enabled = actif;
+            dtpDateFinAbonnement.Enabled = actif;
+
+            txtMontantCommandeRevue.ReadOnly = !actif;
+            txtNumeroCommandeRevue.ReadOnly = !enCoursAjoutCommandeRevue;
+        }
+
+        private void ViderChampsCommandeRevue()
+        {
+            txtNumeroCommandeRevue.Text = "";
+            txtMontantCommandeRevue.Text = "";
+            dtpDateCommandeRevue.Value = DateTime.Now;
+            dtpDateFinAbonnement.Value = DateTime.Now;
+        }
+
+        private void ReinitialiserCommandeRevue()
+        {
+            enCoursAjoutCommandeRevue = false;
+            enCoursModificationCommandeRevue = false;
+
+            ViderChampsCommandeRevue();
+            ActiverSaisieCommandeRevue(false);
+
+            btnEnregistrerCommandeRevue.Enabled = false;
+            btnAnnulerCommandeRevue.Enabled = false;
+            btnModifierCommandeRevue.Enabled = false;
+            btnSupprimerCommandeRevue.Enabled = false;
+            btnAjouterCommandeRevue.Enabled = (idRevueSelectionnee != "");
+        }
+
+
+
+        private void InitOngletAbonnements()
+        {
+            txtNumeroCommandeRevue.Text = "";
+            txtMontantCommandeRevue.Text = "";
+
+            dgvRevuesAbonnement.DataSource = null;
+            dgvCommandesRevue.DataSource = null;
+
+            ActiverSaisieCommandeRevue(false);
+
+            btnAjouterCommandeRevue.Enabled = false;
+            btnModifierCommandeRevue.Enabled = false;
+            btnSupprimerCommandeRevue.Enabled = false;
+            btnEnregistrerCommandeRevue.Enabled = false;
+            btnAnnulerCommandeRevue.Enabled = false;
+        }
+
+        private void ConfigurerGrillesAbonnements()
+        {
+            dgvRevuesAbonnement.ReadOnly = true;
+            dgvRevuesAbonnement.MultiSelect = false;
+            dgvRevuesAbonnement.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvRevuesAbonnement.AllowUserToAddRows = false;
+            dgvRevuesAbonnement.AllowUserToDeleteRows = false;
+            dgvRevuesAbonnement.AllowUserToResizeRows = false;
+            dgvRevuesAbonnement.RowHeadersVisible = false;
+            dgvRevuesAbonnement.AutoGenerateColumns = true;
+            dgvRevuesAbonnement.ClearSelection();
+
+            dgvCommandesRevue.ReadOnly = true;
+            dgvCommandesRevue.MultiSelect = false;
+            dgvCommandesRevue.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvCommandesRevue.AllowUserToAddRows = false;
+            dgvCommandesRevue.AllowUserToDeleteRows = false;
+            dgvCommandesRevue.AllowUserToResizeRows = false;
+            dgvCommandesRevue.RowHeadersVisible = false;
+            dgvCommandesRevue.AutoGenerateColumns = true;
+            dgvCommandesRevue.ClearSelection();
+        }
+
+        private void btnRechercherRevueAbonnement_Click(object sender, EventArgs e)
+        {
+            string recherche = txtRechercheRevueAbonnement.Text.Trim().ToLower();
+
+            var revues = controller.GetAllRevues();
+
+            var resultat = revues.Where(r =>
+                r.Id.ToLower().Contains(recherche) ||
+                r.Titre.ToLower().Contains(recherche)
+            ).ToList();
+
+            dgvRevuesAbonnement.DataSource = resultat;
+
+            if (dgvRevuesAbonnement.Columns.Count > 0)
+            {
+                if (dgvRevuesAbonnement.Columns.Contains("Image"))
+                    dgvRevuesAbonnement.Columns["Image"].Visible = false;
+
+                dgvRevuesAbonnement.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            }
+
+            dgvCommandesRevue.DataSource = null;
+            idRevueSelectionnee = "";
+            ReinitialiserCommandeRevue();
+
+            if (dgvRevuesAbonnement.Rows.Count > 0)
+            {
+                dgvRevuesAbonnement.ClearSelection();
+                dgvRevuesAbonnement.Rows[0].Selected = true;
+                dgvRevuesAbonnement.CurrentCell = dgvRevuesAbonnement.Rows[0].Cells["Id"];
+
+                idRevueSelectionnee = dgvRevuesAbonnement.Rows[0].Cells["Id"].Value.ToString();
+
+                ChargerCommandesRevue(idRevueSelectionnee);
+
+                btnAjouterCommandeRevue.Enabled = true;
+                btnModifierCommandeRevue.Enabled = false;
+                btnSupprimerCommandeRevue.Enabled = false;
+            }
+            else
+            {
+                idRevueSelectionnee = "";
+                dgvCommandesRevue.DataSource = null;
+                ReinitialiserCommandeRevue();
+            }
+        }
+
+        private void ChargerCommandesRevue(string idRevue)
+        {
+            dgvCommandesRevue.DataSource = controller.GetCommandesRevue(idRevue);
+
+            if (dgvCommandesRevue.Columns.Count > 0)
+            {
+                if (dgvCommandesRevue.Columns.Contains("IdRevue"))
+                    dgvCommandesRevue.Columns["IdRevue"].Visible = false;
+
+                dgvCommandesRevue.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            }
+
+            btnAjouterCommandeRevue.Enabled = true;
+
+            if (dgvCommandesRevue.Rows.Count > 0)
+            {
+                dgvCommandesRevue.Rows[0].Selected = true;
+                dgvCommandesRevue.CurrentCell = dgvCommandesRevue.Rows[0].Cells["Id"];
+                AfficherCommandeRevueSelectionnee();
+            }
+            else
+            {
+                ViderChampsCommandeRevue();
+                btnModifierCommandeRevue.Enabled = false;
+                btnSupprimerCommandeRevue.Enabled = false;
+            }
+        }  
+                        
+        private void dgvRevuesAbonnement_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            DataGridViewRow row = dgvRevuesAbonnement.Rows[e.RowIndex];
+            if (row.Cells["Id"].Value == null) return;
+
+            dgvRevuesAbonnement.ClearSelection();
+            row.Selected = true;
+            dgvRevuesAbonnement.CurrentCell = row.Cells["Id"];
+
+            idRevueSelectionnee = row.Cells["Id"].Value.ToString();
+            ChargerCommandesRevue(idRevueSelectionnee);
+
+            btnAjouterCommandeRevue.Enabled = true;
+            btnModifierCommandeRevue.Enabled = false;
+            btnSupprimerCommandeRevue.Enabled = false;
+        }
+
+        private void AfficherCommandeRevueSelectionnee()
+        {
+            if (dgvCommandesRevue.CurrentRow == null || dgvCommandesRevue.CurrentRow.Cells["Id"].Value == null)
+            {
+                return;
+            }
+
+            txtNumeroCommandeRevue.Text = dgvCommandesRevue.CurrentRow.Cells["Id"].Value.ToString();
+
+            if (DateTime.TryParse(dgvCommandesRevue.CurrentRow.Cells["DateCommande"].Value.ToString(), out DateTime dateCommande))
+            {
+                dtpDateCommandeRevue.Value = dateCommande;
+            }
+
+            txtMontantCommandeRevue.Text = dgvCommandesRevue.CurrentRow.Cells["Montant"].Value.ToString();
+
+            if (DateTime.TryParse(dgvCommandesRevue.CurrentRow.Cells["DateFinAbonnement"].Value.ToString(), out DateTime dateFin))
+            {
+                dtpDateFinAbonnement.Value = dateFin;
+            }
+
+            btnModifierCommandeRevue.Enabled = true;
+            btnSupprimerCommandeRevue.Enabled = true;
+        }
+
+        private void dgvCommandesRevue_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            DataGridViewRow row = dgvCommandesRevue.Rows[e.RowIndex];
+            if (row.Cells["Id"].Value == null) return;
+
+            dgvCommandesRevue.ClearSelection();
+            row.Selected = true;
+            dgvCommandesRevue.CurrentCell = row.Cells["Id"];
+
+            AfficherCommandeRevueSelectionnee();
+        }
+
+        private void btnAjouterCommandeRevue_Click(object sender, EventArgs e)
+        {
+            if (idRevueSelectionnee == "")
+            {
+                MessageBox.Show("Sélectionnez d'abord une revue.");
+                return;
+            }
+
+            enCoursAjoutCommandeRevue = true;
+            enCoursModificationCommandeRevue = false;
+
+            ViderChampsCommandeRevue();
+            ActiverSaisieCommandeRevue(true);
+
+            btnAjouterCommandeRevue.Enabled = false;
+            btnModifierCommandeRevue.Enabled = false;
+            btnSupprimerCommandeRevue.Enabled = false;
+            btnEnregistrerCommandeRevue.Enabled = true;
+            btnAnnulerCommandeRevue.Enabled = true;
+        }
+
+        private void btnModifierCommandeRevue_Click(object sender, EventArgs e)
+        {
+            if (txtNumeroCommandeRevue.Text.Trim() == "")
+            {
+                MessageBox.Show("Sélectionnez une commande.");
+                return;
+            }
+
+            enCoursAjoutCommandeRevue = false;
+            enCoursModificationCommandeRevue = true;
+
+            ActiverSaisieCommandeRevue(true);
+
+            btnAjouterCommandeRevue.Enabled = false;
+            btnModifierCommandeRevue.Enabled = false;
+            btnSupprimerCommandeRevue.Enabled = false;
+            btnEnregistrerCommandeRevue.Enabled = true;
+            btnAnnulerCommandeRevue.Enabled = true;
+        }
+
+        private void btnSupprimerCommandeRevue_Click(object sender, EventArgs e)
+        {
+            if (txtNumeroCommandeRevue.Text.Trim() == "")
+            {
+                MessageBox.Show("Sélectionnez une commande.");
+                return;
+            }
+
+            DialogResult rep = MessageBox.Show(
+                "Voulez-vous supprimer cet abonnement ?",
+                "Confirmation",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (rep == DialogResult.Yes)
+            {
+                bool ok = controller.SupprimerCommandeRevue(txtNumeroCommandeRevue.Text.Trim());
+
+                if (ok)
+                {
+                    MessageBox.Show("Suppression effectuée.");
+                    ChargerCommandesRevue(idRevueSelectionnee);
+                    ReinitialiserCommandeRevue();
+                }
+                else
+                {
+                    MessageBox.Show("Suppression impossible.");
+                }
+            }
+        }
+
+        private void btnEnregistrerCommandeRevue_Click(object sender, EventArgs e)
+        {
+            if (idRevueSelectionnee == "")
+            {
+                MessageBox.Show("Aucune revue sélectionnée.");
+                return;
+            }
+
+            if (txtNumeroCommandeRevue.Text.Trim() == "" || txtMontantCommandeRevue.Text.Trim() == "")
+            {
+                MessageBox.Show("Tous les champs sont obligatoires.");
+                return;
+            }
+
+            if (!double.TryParse(txtMontantCommandeRevue.Text.Trim(), out double montant))
+            {
+                MessageBox.Show("Le montant est invalide.");
+                return;
+            }
+
+            CommandeRevue commande = new CommandeRevue(
+                txtNumeroCommandeRevue.Text.Trim(),
+                dtpDateCommandeRevue.Value.ToString("yyyy-MM-dd"),
+                dtpDateFinAbonnement.Value.ToString("yyyy-MM-dd"),
+                montant,
+                idRevueSelectionnee
+            );
+
+            bool ok = false;
+
+            if (enCoursAjoutCommandeRevue)
+            {
+                ok = controller.CreerCommandeRevue(commande);
+            }
+            else if (enCoursModificationCommandeRevue)
+            {
+                ok = controller.ModifierCommandeRevue(commande);
+            }
+
+            if (ok)
+            {
+                MessageBox.Show("Enregistrement effectué.");
+                ChargerCommandesRevue(idRevueSelectionnee);
+                ReinitialiserCommandeRevue();
+            }
+            else
+            {
+                MessageBox.Show("Erreur lors de l'enregistrement.");
+            }
+        }
+
+        private void btnAnnulerCommandeRevue_Click(object sender, EventArgs e)
+        {
+            ReinitialiserCommandeRevue();
         }
         #endregion
     }

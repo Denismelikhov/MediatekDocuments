@@ -535,5 +535,192 @@ namespace MediaTekDocuments.dal
             }
             return false;
         }
+
+        /// <summary>
+        /// Demande la création d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="commande">objet CommandeDocument à créer</param>
+        /// <returns>true si création effectuée</returns>
+        public bool CreerCommandeDocument(CommandeDocument commande)
+        {
+            var data = new
+            {
+                id = commande.Id,
+                dateCommande = commande.DateCommande,
+                montant = commande.Montant,
+                nbExemplaire = commande.NbExemplaire,
+                idLivreDvd = commande.IdLivreDvd
+            };
+
+            string jsonCommande = JsonConvert.SerializeObject(data, new CustomDateTimeConverter());
+            string parametres = "champs=" + Uri.EscapeDataString(jsonCommande);
+
+            try
+            {
+                List<CommandeDocument> liste = TraitementRecup<CommandeDocument>(POST, "commandedocument", parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Demande la modification d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="commande">objet CommandeDocument à modifier</param>
+        /// <returns>true si modification effectuée</returns>
+        public bool ModifierCommandeDocument(CommandeDocument commande)
+        {
+            var data = new
+            {
+                id = commande.Id,
+                dateCommande = commande.DateCommande,
+                montant = commande.Montant,
+                nbExemplaire = commande.NbExemplaire,
+                idLivreDvd = commande.IdLivreDvd,
+                idSuivi = commande.IdSuivi
+            };
+
+            string jsonCommande = JsonConvert.SerializeObject(data, new CustomDateTimeConverter());
+            string parametres = "champs=" + Uri.EscapeDataString(jsonCommande);
+
+            try
+            {
+                List<CommandeDocument> liste = TraitementRecup<CommandeDocument>(PUT, "commandedocument/" + commande.Id, parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Demande la suppression d'une commande de livre ou dvd
+        /// </summary>
+        /// <param name="idCommande">id de la commande</param>
+        /// <returns>true si suppression effectuée</returns>
+        public bool SupprimerCommandeDocument(string idCommande)
+        {
+            string jsonIdCommande = convertToJson("id", idCommande);
+            try
+            {
+                List<CommandeDocument> liste = TraitementRecup<CommandeDocument>(DELETE, "commandedocument/" + jsonIdCommande, null);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Récupère les abonnements d'une revue
+        /// </summary>
+        /// <param name="idRevue">id de la revue concernée</param>
+        /// <returns>Liste d'objets CommandeRevue</returns>
+        public List<CommandeRevue> GetCommandesRevue(string idRevue)
+        {
+            string jsonIdRevue = convertToJson("id", idRevue);
+            List<CommandeRevue> lesCommandes = TraitementRecup<CommandeRevue>(GET, "commanderevue/" + jsonIdRevue, null);
+            return lesCommandes;
+        }
+
+        /// <summary>
+        /// Demande la création d'un abonnement de revue
+        /// </summary>
+        /// <param name="commande">objet CommandeRevue à créer</param>
+        /// <returns>true si création effectuée</returns>
+        public bool CreerCommandeRevue(CommandeRevue commande)
+        {
+            var data = new
+            {
+                id = commande.Id,
+                dateCommande = commande.DateCommande,
+                montant = commande.Montant,
+                dateFinAbonnement = commande.DateFinAbonnement,
+                idRevue = commande.IdRevue
+            };
+
+            string jsonCommande = JsonConvert.SerializeObject(data, new CustomDateTimeConverter());
+            string parametres = "champs=" + Uri.EscapeDataString(jsonCommande);
+
+            try
+            {
+                List<CommandeRevue> liste = TraitementRecup<CommandeRevue>(POST, "commanderevue", parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Demande la modification d'un abonnement de revue
+        /// </summary>
+        /// <param name="commande">objet CommandeRevue à modifier</param>
+        /// <returns>true si modification effectuée</returns>
+        public bool ModifierCommandeRevue(CommandeRevue commande)
+        {
+            var data = new
+            {
+                id = commande.Id,
+                dateCommande = commande.DateCommande,
+                montant = commande.Montant,
+                dateFinAbonnement = commande.DateFinAbonnement,
+                idRevue = commande.IdRevue
+            };
+
+            string jsonCommande = JsonConvert.SerializeObject(data, new CustomDateTimeConverter());
+            string parametres = "champs=" + Uri.EscapeDataString(jsonCommande);
+
+            try
+            {
+                List<CommandeRevue> liste = TraitementRecup<CommandeRevue>(PUT, "commanderevue/" + commande.Id, parametres);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Demande la suppression d'un abonnement de revue
+        /// </summary>
+        /// <param name="idCommande">id de la commande</param>
+        /// <returns>true si suppression effectuée</returns>
+        public bool SupprimerCommandeRevue(string idCommande)
+        {
+            string jsonIdCommande = convertToJson("id", idCommande);
+            try
+            {
+                List<CommandeRevue> liste = TraitementRecup<CommandeRevue>(DELETE, "commanderevue/" + jsonIdCommande, null);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Récupère les abonnements de revue qui expirent dans moins de 30 jours
+        /// </summary>
+        /// <returns>Liste d'objets CommandeRevue</returns>
+        public List<CommandeRevue> GetCommandesRevueExpirationProche()
+        {
+            List<CommandeRevue> lesCommandes = TraitementRecup<CommandeRevue>(GET, "commanderevueexpiration", null);
+            return lesCommandes;
+        }
     }
 }
