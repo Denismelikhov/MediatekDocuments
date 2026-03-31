@@ -27,28 +27,28 @@ namespace MediaTekDocuments.manager
         /// Constructeur privé pour préparer la connexion (éventuellement sécurisée)
         /// </summary>
         /// <param name="uriApi">adresse de l'api</param>
-        /// <param name="authenticationString">chaîne d'authentification</param>
-        private ApiRest(String uriApi, String authenticationString = "")
+        /// <param name="authentificationString">chaîne d'authentification</param>
+        private ApiRest(String uriApi, String authentificationString = "")
         {
             httpClient = new HttpClient() { BaseAddress = new Uri(uriApi) };
-            SetAuthentication(authenticationString);
+            SetAuthentification(authentificationString);
         }
 
         /// <summary>
         /// Crée une instance unique de la classe
         /// </summary>
         /// <param name="uriApi">adresse de l'api</param>
-        /// <param name="authenticationString">chaîne d'authentificatio (login:pwd)</param>
+        /// <param name="authentificationString">chaîne d'authentification (login:pwd)</param>
         /// <returns></returns>
-        public static ApiRest GetInstance(String uriApi, String authenticationString = "")
+        public static ApiRest GetInstance(String uriApi, String authentificationString = "")
         {
             if (instance == null)
             {
-                instance = new ApiRest(uriApi, authenticationString);
+                instance = new ApiRest(uriApi, authentificationString);
             }
             else
             {
-                instance.SetAuthentication(authenticationString);
+                instance.SetAuthentification(authentificationString);
             }
             return instance;
         }
@@ -56,18 +56,18 @@ namespace MediaTekDocuments.manager
         /// <summary>
         /// Méthode d'authentification à l'api : si la chaîne d'authentification est vide, aucune authentification n'est utilisée
         /// </summary>
-        /// <param name="authenticationString">chaîne d'authentificatio (login:pwd)</param>
+        /// <param name="authentificationString">chaîne d'authentificatio (login:pwd)</param>
         /// <returns></returns>
-        public void SetAuthentication(string authenticationString)
+        public void SetAuthentification(string authentificationString)
         {
             httpClient.DefaultRequestHeaders.Authorization = null;
 
-            if (!String.IsNullOrEmpty(authenticationString))
+            if (!String.IsNullOrEmpty(authentificationString))
             {
-                String base64EncodedAuthenticationString =
-                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(authenticationString));
+                String base64EncodedAuthentificationString =
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(authentificationString));
                 httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
+                    new AuthenticationHeaderValue("Basic", base64EncodedAuthentificationString);
             }
         }
 

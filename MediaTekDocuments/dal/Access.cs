@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MediaTekDocuments.manager;
 using MediaTekDocuments.model;
-using MediaTekDocuments.manager;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 
 namespace MediaTekDocuments.dal
@@ -18,7 +19,22 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/";
+        private static readonly string uriApi = ConfigurationManager.AppSettings["uriApi"];
+
+        /// <summary>
+        /// login d'accès à l'API
+        /// </summary>
+        private static readonly string apiLogin = ConfigurationManager.AppSettings["apiLogin"];
+
+        /// <summary>
+        /// mot de passe d'accès à l'API
+        /// </summary>
+        private static readonly string apiPassword = ConfigurationManager.AppSettings["apiPassword"];
+
+        /// <summary>
+        /// chemin du fichier de logs
+        /// </summary>
+        private static readonly string logFilePath = ConfigurationManager.AppSettings["logFilePath"];
 
         /// <summary>
         /// instance unique de la classe
@@ -31,6 +47,11 @@ namespace MediaTekDocuments.dal
         private readonly ApiRest api = null;
 
         /// <summary>
+        /// chaîne d'authentification transmise à l'API
+        /// </summary>
+        private string authentificationString = "";
+
+        /// <summary>
         /// méthode HTTP pour select
         /// </summary>
         private const string GET = "GET";
@@ -40,20 +61,15 @@ namespace MediaTekDocuments.dal
         /// </summary>
         private const string POST = "POST";
 
-        // <summary>
+        /// <summary>
         /// méthode HTTP pour update
         /// </summary>
         private const string PUT = "PUT";
 
         /// <summary>
-        /// méthode HTTP pour supprimer
+        /// méthode HTTP pour delete
         /// </summary>
         private const string DELETE = "DELETE";
-
-        /// <summary>
-        /// chaîne d'authentification transmise à l'API
-        /// </summary>
-        private string authentificationString = "";
 
         /// <summary>
         /// Méthode privée pour créer un singleton
@@ -63,11 +79,12 @@ namespace MediaTekDocuments.dal
         {
             try
             {
+                authentificationString = apiLogin + ":" + apiPassword;
                 api = ApiRest.GetInstance(uriApi, authentificationString);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                LogErreur(e.Message);
                 Environment.Exit(0);
             }
         }
@@ -86,24 +103,27 @@ namespace MediaTekDocuments.dal
         }
 
         /// <summary>
-        /// Méthode d'authentification avec login et pwd
+        /// met à jour la chaîne d'authentification utilisée pour accéder à l'API
         /// </summary>
-        /// <returns>instance unique de la classe</returns>
-        public void SetAuthentication(string login, string pwd)
+        /// <param name="login">login de l'utilisateur</param>
+        /// <param name="pwd">mot de passe de l'utilisateur</param>
+        public void SetAuthentification(string login, string pwd)
         {
             authentificationString = login + ":" + pwd;
-            api.SetAuthentication(authentificationString);
+            api.SetAuthentification(authentificationString);
         }
 
         /// <summary>
-        /// Tester l'authentification
+        /// teste si le login et le mot de passe permettent d'accéder à l'API
         /// </summary>
-        /// <returns>instance unique de la classe</returns>
+        /// <param name="login">login de l'utilisateur</param>
+        /// <param name="pwd">mot de passe de l'utilisateur</param>
+        /// <returns>true si l'authentification réussit</returns>
         public bool TesterAuthentification(string login, string pwd)
         {
             try
             {
-                SetAuthentication(login, pwd);
+                SetAuthentification(login, pwd);
                 List<Categorie> genres = GetAllGenres();
                 return genres != null;
             }
@@ -114,14 +134,16 @@ namespace MediaTekDocuments.dal
         }
 
         /// <summary>
-        ///
+        /// récupère l'utilisateur connecté à partir de ses identifiants
         /// </summary>
-        /// <returns>instance unique de la classe</returns>
+        /// <param name="login">login de l'utilisateur</param>
+        /// <param name="pwd">mot de passe de l'utilisateur</param>
+        /// <returns>objet Utilisateur si l'authentification réussit, sinon null</returns>
         public Utilisateur GetUtilisateur(string login, string pwd)
         {
             try
             {
-                SetAuthentication(login, pwd);
+                SetAuthentification(login, pwd);
                 JObject retour = api.RecupDistant(GET, "utilisateurconnecte", null);
                 string code = (string)retour["code"];
 
@@ -135,7 +157,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
                 return null;
             }
         }
@@ -228,7 +250,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -262,11 +284,11 @@ namespace MediaTekDocuments.dal
                 }
                 else
                 {
-                    Console.WriteLine("code erreur = " + code + " message = " + (String)retour["message"]);
+                    LogErreur("code erreur = " + code + " message = " + (String)retour["message"]);
                 }
             }catch(Exception e)
             {
-                Console.WriteLine("Erreur lors de l'accès à l'API : "+e.Message);
+                LogErreur("Erreur lors de l'accès à l'API : "+e.Message);
                 Environment.Exit(0);
             }
             return liste;
@@ -340,7 +362,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -418,7 +440,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -453,7 +475,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -487,7 +509,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -522,7 +544,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -557,7 +579,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -591,7 +613,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -622,7 +644,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -654,7 +676,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -674,7 +696,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -717,7 +739,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -748,7 +770,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -768,7 +790,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -834,7 +856,7 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
         }
@@ -863,9 +885,60 @@ namespace MediaTekDocuments.dal
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LogErreur(ex.Message);
             }
             return false;
+        }
+
+        /// <summary>
+        /// écrit un message dans la console et dans le fichier de logs
+        /// </summary>
+        /// <param name="message">message à enregistrer</param>
+        private void Log(string message)
+        {
+            string messageLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " [INFO] " + message;
+            Console.WriteLine(messageLog);
+            EcrireDansFichierLog(messageLog);
+        }
+
+        /// <summary>
+        /// écrit une erreur dans la console et dans le fichier de logs
+        /// </summary>
+        /// <param name="message">message d'erreur</param>
+        private void LogErreur(string message)
+        {
+            string messageLog = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " [ERREUR] " + message;
+            Console.WriteLine(messageLog);
+            EcrireDansFichierLog(messageLog);
+        }
+
+        /// <summary>
+        /// écrit dans le fichier de logs
+        /// </summary>
+        /// <param name="message">message à enregistrer</param>
+        private void EcrireDansFichierLog(string message)
+        {
+            try
+            {
+                string cheminLog = logFilePath;
+
+                if (!Path.IsPathRooted(cheminLog))
+                {
+                    cheminLog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, cheminLog);
+                }
+
+                string dossier = Path.GetDirectoryName(cheminLog);
+                if (!string.IsNullOrEmpty(dossier) && !Directory.Exists(dossier))
+                {
+                    Directory.CreateDirectory(dossier);
+                }
+
+                File.AppendAllText(cheminLog, message + Environment.NewLine);
+            }
+            catch
+            {
+                // pas de blocage de l'application si échec de l'écriture dans le fichier de logs
+            }
         }
     }
 }
