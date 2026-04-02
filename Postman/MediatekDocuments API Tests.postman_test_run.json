@@ -1,0 +1,957 @@
+{
+	"id": "986c701f-45a6-43df-8cc1-347fa7d0715b",
+	"name": "MediatekDocuments API Tests",
+	"timestamp": "2026-04-02T03:47:28.323Z",
+	"collection_id": "53649098-175f20a6-a037-4651-a9ed-3a0deb9d02fa",
+	"folder_id": 0,
+	"environment_id": "53649098-75e6dbf0-53ff-43f1-8473-0c9110d6309e",
+	"totalPass": 60,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-04-02T03:47:25.645Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "857e7b1c-1ea3-42b2-837e-22e37150d5be",
+			"name": "Utilisateur connecté",
+			"url": "http://localhost/rest_mediatekdocuments/utilisateurconnecte",
+			"time": 19,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un objet": true,
+				"Le login existe": true,
+				"Le service existe": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un objet": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le login existe": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le service existe": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				19
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un objet": true,
+					"Le login existe": true,
+					"Le service existe": true
+				}
+			]
+		},
+		{
+			"id": "f9d96dfd-9d7a-4178-85ed-b37c3e1b4a32",
+			"name": "GET genres",
+			"url": "http://localhost/rest_mediatekdocuments/genre",
+			"time": 16,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "aa7addbd-f8a0-4860-b4fe-71e7cb810be7",
+			"name": "GET rayons",
+			"url": "http://localhost/rest_mediatekdocuments/rayon",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "0aa0a11f-05fd-4d39-97f4-09d3a811aa65",
+			"name": "GET publics",
+			"url": "http://localhost/rest_mediatekdocuments/public",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "7803015c-57fa-4c34-b383-a4298a93acb6",
+			"name": "GET livres",
+			"url": "http://localhost/rest_mediatekdocuments/livre",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "36061a42-87ba-43d2-9169-fe97a97e1156",
+			"name": "GET dvd",
+			"url": "http://localhost/rest_mediatekdocuments/dvd",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "01621d75-22e9-46a5-a42b-4945d3717fdc",
+			"name": "GET revues",
+			"url": "http://localhost/rest_mediatekdocuments/revue",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "cccda85a-2ec9-4890-9d19-189fb639db58",
+			"name": "GET états",
+			"url": "http://localhost/rest_mediatekdocuments/etat",
+			"time": 16,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "43c89b8d-ca38-4e1b-a0c2-b47c49f1f351",
+			"name": "GET exemplaires d'une revue",
+			"url": "http://localhost/rest_mediatekdocuments/exemplaire/%7B%22id%22%3A%22REVUETEST999%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "bc9e0407-c2d6-4feb-892e-94911874d835",
+			"name": "GET commandes document",
+			"url": "http://localhost/rest_mediatekdocuments/commandedocument/%7B%22id%22%3A%22LIVRETEST3001%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "f982e707-2446-4b75-9833-f84c6589d638",
+			"name": "GET commandes revue",
+			"url": "http://localhost/rest_mediatekdocuments/commanderevue/%7B%22id%22%3A%22REVUETEST999%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "b25c8dbc-6635-4a7e-b3e8-dde39e1af9cc",
+			"name": "GET commandes revue expiration",
+			"url": "http://localhost/rest_mediatekdocuments/commanderevueexpiration",
+			"time": 6,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true,
+				"Le résultat est un tableau": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Le résultat est un tableau": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true,
+					"Le résultat est un tableau": true
+				}
+			]
+		},
+		{
+			"id": "f1af66f0-0594-499d-baf0-dd1e71d2f864",
+			"name": "PUT modifier livre",
+			"url": "http://localhost/rest_mediatekdocuments/livre/LIVRETEST3001",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "f56437a7-9e4b-45e6-9608-80954c8f0458",
+			"name": "DELETE supprimer livre",
+			"url": "http://localhost/rest_mediatekdocuments/livre/%7B%22id%22%3A%22LIVRETEST3001%22%7D",
+			"time": 6,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "1a2d8049-ae4f-440e-9bdf-9e1c68f2896f",
+			"name": "PUT modifier dvd",
+			"url": "http://localhost/rest_mediatekdocuments/dvd/DVDTEST999",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "7dc26b88-9a6c-4016-9cfc-41779faa709f",
+			"name": "DELETE supprimer dvd",
+			"url": "http://localhost/rest_mediatekdocuments/dvd/%7B%22id%22%3A%22DVDTEST999%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "631dfd9f-1e0b-4d6a-bcc6-5f1121d94268",
+			"name": "PUT modifier revue",
+			"url": "http://localhost/rest_mediatekdocuments/revue/REVUETEST999",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "572ad742-1431-4356-9829-22a94caddad4",
+			"name": "DELETE supprimer revue",
+			"url": "http://localhost/rest_mediatekdocuments/revue/%7B%22id%22%3A%22REVUETEST999%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "2d83c691-71be-4042-a29a-f4e6eac0ff1f",
+			"name": "POST créer exemplaire",
+			"url": "http://localhost/rest_mediatekdocuments/exemplaire",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "6c7f7269-68e8-4fc4-8743-387df68a7583",
+			"name": "PUT modifier exemplaire",
+			"url": "http://localhost/rest_mediatekdocuments/exemplaire/REVUETEST999",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "5d91046d-9470-44c4-9f79-42fc9c383d05",
+			"name": "POST créer commande revue",
+			"url": "http://localhost/rest_mediatekdocuments/commanderevue",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "02c890de-627f-48fc-8736-6dec5339ce5c",
+			"name": "PUT modifier commande revue",
+			"url": "http://localhost/rest_mediatekdocuments/commanderevue/CMDREVTEST999",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		},
+		{
+			"id": "9aafc30b-2b1d-46c5-aa7d-35023c2f7860",
+			"name": "DELETE supprimer commande revue",
+			"url": "http://localhost/rest_mediatekdocuments/commanderevue/%7B%22id%22%3A%22CMDREVTEST999%22%7D",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Code API = 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Code API = 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Code API = 200": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 370,
+	"collection": {
+		"requests": [
+			{
+				"id": "857e7b1c-1ea3-42b2-837e-22e37150d5be",
+				"method": "GET"
+			},
+			{
+				"id": "f9d96dfd-9d7a-4178-85ed-b37c3e1b4a32",
+				"method": "GET"
+			},
+			{
+				"id": "aa7addbd-f8a0-4860-b4fe-71e7cb810be7",
+				"method": "GET"
+			},
+			{
+				"id": "0aa0a11f-05fd-4d39-97f4-09d3a811aa65",
+				"method": "GET"
+			},
+			{
+				"id": "7803015c-57fa-4c34-b383-a4298a93acb6",
+				"method": "GET"
+			},
+			{
+				"id": "36061a42-87ba-43d2-9169-fe97a97e1156",
+				"method": "GET"
+			},
+			{
+				"id": "01621d75-22e9-46a5-a42b-4945d3717fdc",
+				"method": "GET"
+			},
+			{
+				"id": "cccda85a-2ec9-4890-9d19-189fb639db58",
+				"method": "GET"
+			},
+			{
+				"id": "43c89b8d-ca38-4e1b-a0c2-b47c49f1f351",
+				"method": "GET"
+			},
+			{
+				"id": "bc9e0407-c2d6-4feb-892e-94911874d835",
+				"method": "GET"
+			},
+			{
+				"id": "f982e707-2446-4b75-9833-f84c6589d638",
+				"method": "GET"
+			},
+			{
+				"id": "b25c8dbc-6635-4a7e-b3e8-dde39e1af9cc",
+				"method": "GET"
+			},
+			{
+				"id": "f1af66f0-0594-499d-baf0-dd1e71d2f864",
+				"method": "PUT"
+			},
+			{
+				"id": "f56437a7-9e4b-45e6-9608-80954c8f0458",
+				"method": "DELETE"
+			},
+			{
+				"id": "1a2d8049-ae4f-440e-9bdf-9e1c68f2896f",
+				"method": "PUT"
+			},
+			{
+				"id": "7dc26b88-9a6c-4016-9cfc-41779faa709f",
+				"method": "DELETE"
+			},
+			{
+				"id": "631dfd9f-1e0b-4d6a-bcc6-5f1121d94268",
+				"method": "PUT"
+			},
+			{
+				"id": "572ad742-1431-4356-9829-22a94caddad4",
+				"method": "DELETE"
+			},
+			{
+				"id": "2d83c691-71be-4042-a29a-f4e6eac0ff1f",
+				"method": "GET"
+			},
+			{
+				"id": "6c7f7269-68e8-4fc4-8743-387df68a7583",
+				"method": "PUT"
+			},
+			{
+				"id": "5d91046d-9470-44c4-9f79-42fc9c383d05",
+				"method": "GET"
+			},
+			{
+				"id": "02c890de-627f-48fc-8736-6dec5339ce5c",
+				"method": "PUT"
+			},
+			{
+				"id": "9aafc30b-2b1d-46c5-aa7d-35023c2f7860",
+				"method": "DELETE"
+			}
+		]
+	}
+}
